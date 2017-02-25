@@ -1,30 +1,46 @@
 #!/bin/bash
-function showusage {
+
+# filename splitslice.sh
+# auther: Kai Xuan (woxuankai@gmail.com)
+
+function showusage (){
 	cat << ENDUSAGE
 
 Split (4D->3D) then slice (3D->2D) 4D images.
 
 Usage:
-$0 -i InputFile/Dir -p Outputprefix -o OutputDir
+splitslice.sh -i InputFile [-o OutputBase]
 
-if OutputDir not specified, OutputDir is the same as InputDir.
+Note:
+
+If  is the same as InputDir.
 
 ENDUSAGE
 	exit 1
 }
 
-FSLSPLIT='fsl5.0-fslsplit'
-FSLSLICE='fsl5.0-fslslice'
+function splitslice(){
+	# fsl5.0-fslspllit will add only xxxx to distinguish different volumes
+	# fsl5.0-fslslice will add _slice_xxxx to distinguish different slices
+	# thus add _volume_ to match fslslice style
+	$SPLIT "${1}" "${2}_volume_" -t
+	SPLITS=$(ls ${2}_volume_*)
+	for ONESPLIT in $SPLITS
+	do
+		$SLICE "$ONESLPIT"
+
+SPLIT='fsl5.0-fslsplit'
+SLICE='fsl5.0-fslslice'
 INPUTDIR=''
 OUTPUTPREFIX=''
 OUTPUTDIR=''
 
 # check if needed commands exit
-type "$FSLSPLIT"  >/dev/null 2>&1 || \
-	echo "Error! Cannot find a command named $FSLSPLIT" || \
+type "$SPLIT"  >/dev/null 2>&1 || \
+	echo "Error! Cannot find a command named $SPLIT" || \
 	exit 1
-type "$FSLSLICE" >/dev/null 2>&1 || \
-	echo "Error! Cannot find a command named $FSLSLICE" || \
+type "$SLICE" >/dev/null 2>&1 || \
+	echo "Error! Cannot find a command named $SLICE" || \
 	exit 1
 
 # reading command line arguments
@@ -70,6 +86,7 @@ fi
 for INPUTFILE in $(ls $INPUTDIR)
 do
 	echo "processing $INPUTFILE ..."
+	splitslice "$INPUTFILE" "$OUTPUTDIR//$OUTPUTPREFIX"
 done
 
 
