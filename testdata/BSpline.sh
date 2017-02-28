@@ -3,14 +3,17 @@
 #ATLAS='d2'  #imaged segmented
 #TARGET='d1' #image to be segmented
 
-if test $# -eq 2
+if test $# -ge 2
 then
 	TARGET="$1"
 	ATLAS="$2"
 	echo "target image is $TARGET"
 	echo "altas is $ATLAS"
 else
-	echo "usage: $0 TargetName AtlasName"
+	echo "usage: $0 TargetName AtlasName [options]"
+	echo "options:"
+	echo "-v: view result"
+	echo "-d: show dice value"
 	echo "target and atlas are expected in ./data/ folder"
 	exit 1
 fi
@@ -58,6 +61,23 @@ antsApplyTransforms \
 	-t ${TRANS}0GenericAffine.mat
 
 GOLDEN="./data/${TARGET}_seg.nii.gz"
-fslview -m single ${FIXED} ${GOLDEN} -l Red -t 0.5 ${SEGW} -l Blue -t 0.5
+DICE="./output/dice_${TARGET}_prediction_from_${ATLAS}.txt"
+DOVIEW="fslview -m single ${FIXED} ${GOLDEN} -l Red -t 0.5 ${SEGW} -l Blue -t 0.5"
+DODICE="ImageMath 2 $DICE DiceAndMinDistSum "$GOLDEN" "$SEGW""
+shift;shift
+while getopts "vd" OPT
+do
+	case $OPT in
+		v)
+			eval "$DOVIEW"
+			;;
+		d)
+			eval "$DODICE"
+			echo " "
+			echo "$DICE"
+			cat "$DICE"
+			;;
+	esac
+done
 exit 0
 
