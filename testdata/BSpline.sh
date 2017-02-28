@@ -69,13 +69,13 @@ while getopts "vd" OPT
 do
 	case $OPT in
 		v)
-			eval "$DOVIEW"
+			# let fslview run in background
+			eval "$DOVIEW" &
 			;;
 		d)
 			eval "$DODICE"
 			echo " "
-			echo "$DICE"
-			cat "$DICE"
+			echo -e "${DICE}\n" $(cat "$DICE")
 			;;
 	esac
 done
