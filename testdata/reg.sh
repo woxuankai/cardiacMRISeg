@@ -1,0 +1,22 @@
+antsRegistration \
+	--verbose 1 --dimensionality 2 --float 0 \
+	--output [predictions/1004_pred1000_3_0_,predictions/1004_pred1000_3_0_Warped.nii.gz,predictions/1004_pred1000_3_0_InverseWarped.nii.gz] \
+	--interpolation Linear \
+	--use-histogram-matching 1 \
+	--winsorize-image-intensities [0.005,0.995] \
+	--initial-moving-transform [test/1004_3.nii.gz,train/1000_3.nii.gz,1] \
+	--transform Rigid[0.1] \
+	--metric MI[test/1004_3.nii.gz,train/1000_3.nii.gz,1,32,Regular,0.25] \
+	--convergence [1000x500x250x0,1e-6,10] \
+	--shrink-factors 12x8x4x2 \
+	--smoothing-sigmas 4x3x2x1vox \
+	--transform Affine[0.1] \
+	--metric MI[test/1004_3.nii.gz,train/1000_3.nii.gz,1,32,Regular,0.25] \
+	--convergence [1000x500x250x0,1e-6,10] \
+	--shrink-factors 12x8x4x2 \
+	--smoothing-sigmas 4x3x2x1vox \
+	--transform SyN[0.1,3,0] \
+	--metric MI[test/1004_3.nii.gz,train/1000_3.nii.gz,1,32] \
+	--convergence [100x100x70x50x0,1e-6,10] \
+	--shrink-factors 10x6x4x2x1 \
+	--smoothing-sigmas 5x3x2x1x0vox
