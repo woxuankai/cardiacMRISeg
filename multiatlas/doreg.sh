@@ -40,18 +40,27 @@ do
 done
 
 # verify arguments
-test -f $FIXED || \
-	{echo "unable to find fixed image $FIXED"; usage;  exit 1; }
-test -f $MOVING || \
-	{echo "unable to find moving image $MOVING"; usage; exit 1; }
-test -f $SEG || \
-	{echo "unable to find atlas lable $SEG"; usage; exit 1; }
-test -n $WSEG || \
-	{echo "missing warped label filename (-t)"; usage; exit 1; }
-test -n $TRANS || \
-	{echo "missing transform filename (-s)"; usage; exit 1; }
-test -n $WMOVING || \
-	{echo "missing warped moving image filename (-w)"; usage; exit 1; }
+# test -f (with no arguments) will return true
+test -f "$FIXED" || \
+	{ echo "unable to find fixed image $FIXED"; usage;  exit 1; }
+
+test -f "$MOVING" || \
+	{ echo "unable to find moving image $MOVING"; usage; exit 1; }
+
+test -f "$SEG" || \
+	{ echo "unable to find atlas lable $SEG"; usage; exit 1; }
+
+test -n "$WSEG" || \
+	{ echo "missing warped label filename (-t)"; usage; exit 1; }
+mkdir -p $(dirname "$WSEG")
+
+test -n "$TRANS" || \
+	{ echo "missing transform filename (-s)"; usage; exit 1; }
+mkdir -p $(dirname "$TRANS")
+
+test -n "$WMOVING" || \
+	{ echo "missing warped moving image filename (-w)"; usage; exit 1; }
+mkdir -p $(dirname "$WMOVING")
 
 # registration
 
@@ -76,7 +85,7 @@ antsRegistration \
 	--convergence [800x400x200x0,1e-6,10] \
 	--shrink-factors 8x4x2x1 \
 	--smoothing-sigmas 3x2x1x0vox \
-	|| {echo "Error!! failed to do registration"; exit 1;}
+	|| { echo "Error!! failed to do registration"; exit 1;}
 
 # apply transform
 antsApplyTransforms \
@@ -84,7 +93,7 @@ antsApplyTransforms \
 	-i ${SEG} -r ${FIXED} -o ${WSEG} -n Linear \
 	-t ${TRANS}1BSpline.txt \
 	-t ${TRANS}0GenericAffine.mat \
-	|| {echo "Error!! fialed to apply transform"; exit 1;}
+	|| { echo "Error!! fialed to apply transform"; exit 1;}
 
 exit 0;
 
