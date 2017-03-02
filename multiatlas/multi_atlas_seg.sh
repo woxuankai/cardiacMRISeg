@@ -5,6 +5,7 @@ function usage(){
 usage:
 multi_atlas_seg.sh
 	-t <target> -p <target_label_prediction>
+	-n <best N labels used for label fusion>
 	[-v (verbose, no arugment)]
 	[-j <parallel job number>]
 	[-h (help, no arugment)]
@@ -15,6 +16,7 @@ multi_atlas_seg.sh
 ENDOFUSAGE
 }
 
+
 ATLAS_IMAGES=()
 ATLAS_LABELS=()
 TARGET=''
@@ -22,6 +24,9 @@ PREDICTION=''
 PARALLELJOBS='3'
 DOREG='./doreg.sh'
 VERBOSE=false
+FUSENUM=''
+
+
 
 # check software dependency
 which antsRegistration >/dev/null || \
@@ -32,9 +37,13 @@ which parallel >/dev/null || parallel --version | fgrep -q "GNU parallel" || \
 	echo "cannot find GNU parallel"
 test -x "$DOREG" || \
 	{ echo "$DOREG doesn't exits or is not executable"; exit 1; }
+which MeasureImageSimilarity >/dev/null || \
+	echo "cannot find MeasureImageSimilarty"
+
+
 
 # parse arguments
-while getopts 't:p:i:l:j:vh' OPT
+while getopts 't:p:i:l:j:n:vh' OPT
 do
 	case $OPT in
 		t) # target
@@ -55,6 +64,9 @@ do
 		v) # verbose
 			VERBOSE=true
 			;;
+		n) # best n labels
+			FUSENUM="$OPTARG"
+			;;
 		h) # help
 			usage
 			exit 0;
@@ -65,6 +77,7 @@ do
 			;;
 	esac
 done
+
 
 
 # verify argument parameters
@@ -88,8 +101,13 @@ do
 		{ echo "file $ATLAS_LABELS[$i] unreadable or doesn't exist"; \
 			usage; exit 1; }
 done
+test "$FUSENUM" -gt 0 && test "$FUSENUM" -le "${#ATLAS_IMAGES[@]}" || \
+	{ echo "label number for fusion -n ${FUSENUM} \
+shoud > 0 and <= number of atlases ( ${#ATLAS_IMAGES[@]} )"; exit 1 ; }
 test "$PARALLELJOBS" -gt 0 || \
 	{ echo "invalid job number $PARALLELJOBS"; exit 1; }
+
+
 
 # do registration
 BASENAME="$(dirname ${PREDICTION})/$(basename ${PREDICTION} | cut -d. -f1)"
@@ -101,7 +119,7 @@ for (( i = 0; i < ${#ATLAS_IMAGES[@]}; i++ ))
 do
 	WARPED_IMAGE="${BASENAME}_warpedimage_${i}.nii.gz"
 	WARPED_LABEL="${BASENAME}_warpedlabel_${i}.nii.gz"
-	TRANSFORM="${BASENAME}_transform_"
+	TRANSFORM="${BASENAME}_transform_${i}_"
 	WARPED_IMAGES[${#WARPED_IMAGES[@]}]="$WARPED_IMAGE"
 	WARPED_LABELS[${#WARPED_LABELS[@]}]="$WARPED_LABEL"
 	PARALLELJOB_DOREG="${PARALLELJOB_DOREG} \
@@ -117,11 +135,41 @@ done
 test $VERBOSE && \
 	{ echo "IFNO: doing registration"; SHOWBAR='--bar'; } || \
 	SHOWBAR=''
-echo -e "$PARALLELJOB_DOREG" | parallel -j $PARALLELJOBS $SHOWBAR
+# ignore non-empty line
+# (which will also be considered as a command in parallel)
+echo -e "$PARALLELJOB_DOREG" | \
+	grep -v '^$' | \
+	parallel -j $PARALLELJOBS $SHOWBAR
 
 #doreg.sh -f <fixed image (target)> -l <label of moving image (atlas seg)>
 #-m <moving image (atlas lable)> -t <transform basename>
 #-s <warped label (target seg)> -w <warped image>
+
+
+# choose best n labels
+# compute and sort similarity
+SIMILARITIES=()
+SIMILARITY_GATE=''
+PARALLELJOB_SORT=''
+# compute
+for (( i = 0; i < ${#ATLAS_IMAGES[@]}; i++ ))
+do
+	SIMILARITY=$( MeasureImageSimilarity 2 1 \
+		${TARGET} ${WARPED_IMAGES[$i]} | \
+		fgrep '=> CC' | rev | cut -d' ' -f1 | rev )
+	SIMILARITIES[${#SIMILARITIES[@]}]="${SIMILARITY}"
+done
+# sort
+SIMILARITY_GATE=$( echo ${SIMILARITIES[@]} | \
+	tr " " "\n" | sort -gr | cut -d$'\n' -f"${FUSENUM}" )
+LABELS_CHOSEN=() # sometimes number of chosen labels may be larger than FUSENUM
+for (( i = 0; i < ${#ATLAS_IMAGES[@]}; i++ ))
+do
+	test $(echo "${SIMILARITIES[${i}]} >= ${SIMILARITY_GATE}" | bc) \
+	       	-eq 1 && \
+		LABELS_CHOSEN[${#LABELS_CHOSEN[@]}]="${SIMILARITIES[${i}]}"
+done
+echo "${LABELS_CHOSEN[@]}"
 
 exit 0
 

@@ -5,6 +5,7 @@
 	-p ./output/predict_seg.nii.gz \
 	-v \
 	-j 4 \
+	-n 1 \
 	-i ../reg2d/data/d1.nii.gz -l ../reg2d/data/d1_seg.nii.gz \
 	-i ../reg2d/data/d2.nii.gz -l ../reg2d/data/d2_seg.nii.gz
 
