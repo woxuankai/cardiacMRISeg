@@ -10,7 +10,7 @@ then
 	echo "target image is $TARGET"
 	echo "altas is $ATLAS"
 else
-	echo "usage: $0 TargetName AtlasName [options]"
+	echo "usage: $0 <TargetName> <AtlasName> <dimensionality> [options]"
 	echo "options:"
 	echo "-v: view result"
 	echo "-d: show dice value"
