@@ -7,8 +7,10 @@ if test $# -ge 2
 then
 	TARGET="$1"
 	ATLAS="$2"
+	DIM="$3"
 	echo "target image is $TARGET"
 	echo "altas is $ATLAS"
+	echo "dimentionality is $DIM"
 else
 	echo "usage: $0 <TargetName> <AtlasName> <dimensionality> [options]"
 	echo "options:"
@@ -24,16 +26,17 @@ mkdir -p ./output
 FIXED="./data/${TARGET}.nii.gz"
 MOVING="./data/${ATLAS}.nii.gz"
 
-test -f $FIXED || { echo "cannot find $FIXED" ; exit 1; }
-test -f $MOVING || { echo "cannot find $MOVING" ; exit 1; }
+test -f "$FIXED" || { echo "cannot find $FIXED" ; exit 1; }
+test -f "$MOVING" || { echo "cannot find $MOVING" ; exit 1; }
+test "$DIM" -eq 2 || "$DIM" -eq 3 || \
+	{ echo "dimentionality should be either 2 or 3"; exit 1; }
 
 SEGMENT="./data/${ATLAS}_seg.nii.gz"
 SEGW="./output/${TARGET}_seg_prediction_from_${ATLAS}.nii.gz"
 TRANS="./output/Transform_${ATLAS}_to_${TARGET}"
 ATLASW="./output/Warped${ATLAS}_for_${TARGET}.nii.gz"
-METRIC="MI[$FIXED,$MOVING,1,32,Regular,0.25]"
 antsRegistration \
-	--verbose 0 --dimensionality 2 --float 0 \
+	--verbose 0 --dimensionality ${DIM} --float 0 \
 	--output "[${TRANS},${ATLASW}]" \
 	--interpolation Linear --use-histogram-matching 0 \
 	--winsorize-image-intensities '[0.005,0.995]' \
@@ -48,7 +51,7 @@ antsRegistration \
 	--convergence [1000x500x250x0,1e-6,10] \
 	--shrink-factors 8x4x2x1 \
 	--smoothing-sigmas 3x2x1x0vox \
-        --transform BSpline[0.5,400] \
+        --transform BSpline[0.1,50] \
 	--metric "CC[$FIXED,$MOVING,1,4]" \
 	--convergence [800x400x200x0,1e-6,10] \
 	--shrink-factors 8x4x2x1 \
@@ -64,7 +67,7 @@ GOLDEN="./data/${TARGET}_seg.nii.gz"
 DICE="./output/dice_${TARGET}_prediction_from_${ATLAS}.txt"
 DOVIEW="fslview -m single ${FIXED} ${GOLDEN} -l Red -t 0.5 ${SEGW} -l Blue -t 0.5"
 DODICE="ImageMath 2 $DICE DiceAndMinDistSum "$GOLDEN" "$SEGW""
-shift;shift
+shift;shift;shift
 while getopts "vd" OPT
 do
 	case $OPT in
