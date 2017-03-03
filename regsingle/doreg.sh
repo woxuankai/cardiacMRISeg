@@ -28,7 +28,7 @@ MOVING="./data/${ATLAS}.nii.gz"
 
 test -f "$FIXED" || { echo "cannot find $FIXED" ; exit 1; }
 test -f "$MOVING" || { echo "cannot find $MOVING" ; exit 1; }
-test "$DIM" -eq 2 || "$DIM" -eq 3 || \
+test "$DIM" -eq 2 || test "$DIM" -eq 3 || \
 	{ echo "dimentionality should be either 2 or 3"; exit 1; }
 
 SEGMENT="./data/${ATLAS}_seg.nii.gz"
@@ -58,7 +58,7 @@ antsRegistration \
 	--smoothing-sigmas 3x2x1x0vox
 
 antsApplyTransforms \
-	-d 2 --float 0 \
+	-d ${DIM} --float 0 \
 	-i ${SEGMENT} -r ${FIXED} -o ${SEGW} -n Linear \
 	-t ${TRANS}1BSpline.txt \
 	-t ${TRANS}0GenericAffine.mat
@@ -66,7 +66,7 @@ antsApplyTransforms \
 GOLDEN="./data/${TARGET}_seg.nii.gz"
 DICE="./output/dice_${TARGET}_prediction_from_${ATLAS}.txt"
 DOVIEW="fslview -m single ${FIXED} ${GOLDEN} -l Red -t 0.5 ${SEGW} -l Blue -t 0.5"
-DODICE="ImageMath 2 $DICE DiceAndMinDistSum "$GOLDEN" "$SEGW""
+DODICE="ImageMath ${DIM} $DICE DiceAndMinDistSum "$GOLDEN" "$SEGW""
 shift;shift;shift
 while getopts "vd" OPT
 do
