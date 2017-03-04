@@ -120,6 +120,8 @@ do
 	WARPED_IMAGE="${BASENAME}_warpedimage_${i}.nii.gz"
 	WARPED_LABEL="${BASENAME}_warpedlabel_${i}.nii.gz"
 	TRANSFORM="${BASENAME}_transform_${i}_"
+	rm -f "${WARPPED_IMAGE}" "${WARPED_LABEL}" "${TRANSFORM}"* || \
+		{ echo "unable to delete some existing file(s)"; exit 1; }
 	WARPED_IMAGES[${#WARPED_IMAGES[@]}]="$WARPED_IMAGE"
 	WARPED_LABELS[${#WARPED_LABELS[@]}]="$WARPED_LABEL"
 	PARALLELJOB_DOREG="${PARALLELJOB_DOREG} \
@@ -140,12 +142,21 @@ test $VERBOSE && \
 echo -e "$PARALLELJOB_DOREG" | \
 	grep -v '^$' | \
 	parallel -j $PARALLELJOBS $SHOWBAR
+# check output which may imply if the registration succeeds.
+for (( i = 0; i < ${#WARPED_IMAGES[@]}; i++ ))
+do
+	test -r "${WARPED_IMAGES[${i}]}" && \
+		test -r "${WARPED_LABELS[${i}]}" || \
+		{ echo "registraion ${ATLAS_IMAGES[$i]} -> ${TARGET} failed"; \
+			exit 1; }
+done
+
 
 #doreg.sh -f <fixed image (target)> -l <label of moving image (atlas seg)>
 #-m <moving image (atlas lable)> -t <transform basename>
 #-s <warped label (target seg)> -w <warped image>
 
-
+# label fusion
 # choose best n labels
 # compute and sort similarity
 SIMILARITIES=()
@@ -169,7 +180,11 @@ do
 	       	-eq 1 && \
 		LABELS_CHOSEN[${#LABELS_CHOSEN[@]}]="${SIMILARITIES[${i}]}"
 done
-echo "${LABELS_CHOSEN[@]}"
+# echo "${LABELS_CHOSEN[@]}"
+
+# fuse
+ImageMath "${PREDICTION}" MajorityVoting ${LABELS_CHOSEN[@]} || \
+	{ echo "failed to do majority voting"; exit 1; }
 
 exit 0
 
