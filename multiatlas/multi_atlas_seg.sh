@@ -28,6 +28,7 @@ FUSENUM=''
 DIM='2'
 
 
+
 # check software dependency
 which antsRegistration >/dev/null || \
 	echo "cannot find antsRegistration"
@@ -185,8 +186,19 @@ do
 done
 
 # fuse
-ImageMath "${DIM}" "${PREDICTION}" MajorityVoting ${LABELS_CHOSEN[@]} || \
-	{ echo "failed to do majority voting"; exit 1; }
+function majorityvote(){
+	ImageMath "${DIM}" "${PREDICTION}" \
+		MajorityVoting ${LABELS_CHOSEN[@]} || \
+		{ echo "failed to do majority voting"; exit 1; }
+	}
+function staple(){
+	LABEL4D="${BASENAME}_4D.nii.gz"
+	fsl5.0-fslmerge -t ${LABEL4D} ${LABELS_CHOSEN[@]} || \
+		{ echo "failed to merge to 4D label"; exit 1; }
+	seg_LabFusion -in "${LABEL4D}" -STAPLE -out "${PREDICTION}" || \
+		{ echo "failed to do staple"; exit 1; }
+	}
+staple
 
 exit 0
 

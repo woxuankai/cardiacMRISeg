@@ -1,4 +1,7 @@
 #!/bin/bash
+
+mkdir -p ./data
+
 ROI='fsl5.0-fslroi'
 # xmin xsize ymin ysize zmin zsize 
 PAR='100 81     61 101  8 1'

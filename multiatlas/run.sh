@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# usage: $0 [spec vol]
 
 SPEC='d0'
 VOL='v1'
