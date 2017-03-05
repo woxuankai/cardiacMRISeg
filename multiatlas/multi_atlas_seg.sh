@@ -1,14 +1,34 @@
 #!/bin/bash
 
+DOREG='./doreg.sh'
+FSLHD='fsl5.0-fslhd'
+FSLMERGE='fsl5.0-fslmerge'
+PARALLEL='parallel'
+ANTSREG='antsRegistration'
+ANTAPPLY='antsApplyTransforms'
+MEASURESIM='MeasureImageSimilarity'
+IMAGEMATH='ImageMath'
+
+# check software dependency
+for APP in $ANTSREG $ANTSAPPLY $PARALLEL $IMAGEMATH \
+	$DOREG $MEASURESIM $FSLHD $FSLMERGE
+do
+	which "$APP" >/dev/null || \
+		{ echo "cannot execute $APP" >&2; exit 1; }
+done
+
 function usage(){
-	cat <<ENDOFUSAGE
+	cat >&2 <<ENDOFUSAGE
 usage:
 multi_atlas_seg.sh
 	-t <target> -p <target_label_prediction>
-	-n <best N labels used for label fusion>
-	[-v (verbose, no arugment)]
-	[-j <parallel job number>]
-	[-h (help, no arugment)]
+	[-n <best N labels used for label fusion>, default 4]
+	[-v verbose, default 0]
+	[-j parallel job number, default 4]
+	[-f fusion method, majoriyvote(default) or staple]
+	[-s skip registration if possible, default 0]
+	[-d <output file> calculate dice]
+	[-h (help)]
 	-i <atlas_image1> -l <atlas_label1>
 	-i <atlas_image2> -l <atlas_label2>
 	...
@@ -17,33 +37,23 @@ ENDOFUSAGE
 }
 
 
-ATLAS_IMAGES=()
-ATLAS_LABELS=()
-TARGET=''
-PREDICTION=''
-PARALLELJOBS='3'
-DOREG='./doreg.sh'
-VERBOSE=false
-FUSENUM=''
-DIM='2'
+# mandatory arguments
+ATLAS_IMAGES=() # i
+ATLAS_LABELS=() # l
+TARGET='' # t
+PREDICTION='' # p
 
-
-# check software dependency
-which antsRegistration >/dev/null || \
-	echo "cannot find antsRegistration"
-which antsApplyTransforms >/dev/null || \
-	echo "cannot find antsApplyTransforms"
-which parallel >/dev/null || parallel --version | fgrep -q "GNU parallel" || \
-	echo "cannot find GNU parallel"
-test -x "$DOREG" || \
-	{ echo "$DOREG doesn't exits or is not executable"; exit 1; }
-which MeasureImageSimilarity >/dev/null || \
-	echo "cannot find MeasureImageSimilarty"
-
+# optional arguments
+PARALLELJOBS='3' # j
+VERBOSE=0 # v
+FUSENUM='4' # n
+FUSIONMETHOD='majorityvote' # f
+SKIPREG='1' # s
+DICEFILE='' # d
 
 
 # parse arguments
-while getopts 't:p:i:l:j:n:vh' OPT
+while getopts 't:p:i:l:j:n:v:f:s:d:h' OPT
 do
 	case $OPT in
 		t) # target
@@ -62,16 +72,19 @@ do
 			PARALLELJOBS="$OPTARG"
 			;;
 		v) # verbose ####
-			VERBOSE=true
+			VERBOSE="$OPTARG"
 			;;
 		n) # best n labels
 			FUSENUM="$OPTARG"
 			;;
-		f) # label fusion method ####
+		f) # label fusion method
+			FUSIONMETHOD="$OPTARG"
 			;;
-		s) # skip registration if possible  ####
+		s) # skip registration if possible
+			SKIPREG="$OPTARG"
 			;;
-		d) # show dice ####
+		d) # show dice
+			DICEPATH="$OPTDICE"
 			;;
 		h) # help
 			usage
@@ -85,28 +98,39 @@ do
 done
 
 
-
 # verify argument parameters
-test -r "$TARGET" || \
-	{ echo "cannot find target image (-t) $TARGET"; usage; exit 1; }
-test -n "$PREDICTION" || \
-	{ echo "prediction segmentation (-p) not set"; usage; exit 1; }  && \
-	mkdir -p $( dirname $PREDICTION ) && \
-	touch "$PREDICTION" || \
-	{ echo "permission denied creating $PREDICTION"; exit 1; }
+
+# mandatory arguments
+# ATLAS_IMAGES=() 
+# ATLAS_LABELS=()
 test "${#ATLAS_IMAGES[@]}" -eq "${#ATLAS_LABELS[@]}" || \
-	{ echo "altas images and labels don't match"; exit 1; }
-test "${#ATLAS_IMAGES[@]}" -gt 0 || \
-	{ echo "altas image and label not specified"; exit 1; }
-for (( i = 0; i < ${#ATLAS_IMAGES[@]}; i++ ))
-do
-	test -r "${ATLAS_IMAGES[$i]}" || \
-		{ echo "file $ATLAS_IMAGES[$i] unreadable or doesn't exist"; \
-			usage; exit 1; }
-	test -r "${ATLAS_LABELS[$i]}" || \
-		{ echo "file $ATLAS_LABELS[$i] unreadable or doesn't exist"; \
-			usage; exit 1; }
-done
+	{ echo "altas images and labels don't match" >&2; exit 1; }
+test "${#ATLAS_IMAGES[@]}" -ge 2 || \
+	{ echo "altas image and label not enough" >&2; exit 1; }
+# TARGET=''
+test -r "$TARGET" || \
+	{ echo "target (-t) not set or not accessable" >&2; usage; exit 1; }
+# PREDICTION='' 
+test -n "$PREDICTION" || \
+	{ echo "label prediction (-p) not set" >&2; usage; exit 1; }
+
+# optional arguments
+test "$ARALLELJOBS" -gt 0 || \
+	{ echo "parallel jobs (-j) should > 0" >&2; exit 1; }
+test "$VERBOSE" -ge 0 || \
+	{ echo "verbose (-j) option should >= 0" >&2; exit 1; }
+test "$FUSENUM" -ge 2 && test "$FUSENUM" -le "${#ATLAS_LABELS[@]}" || \
+	{ echo "fusenum (-n) should >=2 and <= ${#ATLASL_LABELS[@]}" >&2; 
+		exit 1; }
+test ${FUSIONMETHOD} = "majorityvote" || test ${FUSIONMETHOD} = "staple" || \
+	{ echo "invalid -f ${FUSIONMETHOD}" >&2; exit 1; }
+test ${SKIPREG} -ge 0 || \
+	{ echo "${SKIPREG} should >= 0" >&2; exit 1; }
+# DICEFILE
+test "${VERBOSE}" -ge 1 && \
+	echo ###############################
+
+# care only if set
 test "$FUSENUM" -gt 0 && test "$FUSENUM" -le "${#ATLAS_IMAGES[@]}" || \
 	{ echo "label number for fusion -n ${FUSENUM} \
 shoud > 0 and <= number of atlases ( ${#ATLAS_IMAGES[@]} )"; exit 1 ; }
@@ -114,24 +138,29 @@ test "$PARALLELJOBS" -gt 0 || \
 	{ echo "invalid job number $PARALLELJOBS"; exit 1; }
 
 
+# get dimensionality
+DIM="$( ${FSLHD} ${TARGET} | fgrep -w 'dim0' | tr -s ' ' | cut -d' ' -f2 )"
+test "${DIM}" -ge 2 && test "${DIM}" -le 3 || \
+	{ echo "dimensionality not available" >&2 ; exit 1; }
 
 # do registration
-BASENAME="$(dirname ${PREDICTION})/$(basename ${PREDICTION} | cut -d. -f1)"
+BASEPATH="$(dirname ${PREDICTION})/$(basename ${PREDICTION} | cut -d. -f1)"
 PARALLELJOB_DOREG=''
 PARALLELJOB_APPLYT=''
 WARPED_IMAGES=()
 WARPED_LABELS=()
 for (( i = 0; i < ${#ATLAS_IMAGES[@]}; i++ ))
 do
-	WARPED_IMAGE="${BASENAME}_warpedimage_${i}.nii.gz"
-	WARPED_LABEL="${BASENAME}_warpedlabel_${i}.nii.gz"
-	TRANSFORM="${BASENAME}_transform_${i}_"
+	WARPED_IMAGE="${BASEPATH}_warpedimage_${i}.nii.gz"
+	WARPED_LABEL="${BASEPATH}_warpedlabel_${i}.nii.gz"
+	TRANSFORM="${BASEPATH}_transform_${i}_"
 	rm -f "${WARPPED_IMAGE}" "${WARPED_LABEL}" "${TRANSFORM}"* || \
 		{ echo "unable to delete some existing file(s)"; exit 1; }
 	WARPED_IMAGES[${#WARPED_IMAGES[@]}]="$WARPED_IMAGE"
 	WARPED_LABELS[${#WARPED_LABELS[@]}]="$WARPED_LABEL"
 	PARALLELJOB_DOREG="${PARALLELJOB_DOREG} \
 		$DOREG \
+		-d '${DIM}' \
 		-f '${TARGET}' \
 		-l '${ATLAS_LABELS[$i]}' \
 		-m '${ATLAS_IMAGES[$i]}' \
@@ -157,11 +186,6 @@ do
 			exit 1; }
 done
 
-
-#doreg.sh -f <fixed image (target)> -l <label of moving image (atlas seg)>
-#-m <moving image (atlas lable)> -t <transform basename>
-#-s <warped label (target seg)> -w <warped image>
-
 # label fusion
 # choose best n labels
 # compute and sort similarity
@@ -171,7 +195,8 @@ PARALLELJOB_SORT=''
 # compute
 for (( i = 0; i < ${#ATLAS_IMAGES[@]}; i++ ))
 do
-	SIMILARITY=$( MeasureImageSimilarity 2 1 \
+	# 1 for cross correlation
+	SIMILARITY=$( MeasureImageSimilarity ${DIM} 1 \
 		${TARGET} ${WARPED_IMAGES[$i]} | \
 		fgrep '=> CC' | rev | cut -d' ' -f1 | rev )
 	SIMILARITIES[${#SIMILARITIES[@]}]="${SIMILARITY}"
@@ -197,7 +222,7 @@ function majorityvote(){
 		{ echo "failed to do majority voting"; exit 1; }
 	}
 function staple(){
-	LABEL4D="${BASENAME}_4D.nii.gz"
+	LABEL4D="${BASEPATH}_4D.nii.gz"
 	fsl5.0-fslmerge -t ${LABEL4D} ${LABELS_CHOSEN[@]} || \
 		{ echo "failed to merge to 4D label"; exit 1; }
 	seg_LabFusion -in "${LABEL4D}" -STAPLE -out "${PREDICTION}" || \

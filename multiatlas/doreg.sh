@@ -1,18 +1,21 @@
 #!/bin/bash
 function usage(){
-	cat << ENDOFUSAGE
+	cat >&2 << ENDOFUSAGE
 usage:
 doreg.sh
 	-f <fixed image (target)> -l <label of moving image (atlas seg)>
-	-m <moving image (atlas lable)> -t <transform basename>
+	-m <moving image (atlas lable)> -t <transform base path>
 	-s <warped label (target seg)> -w <warped image>
-	-p <skip registration if possible (by comparing time)>
+	-d <dimensionality>
+	[-h (show help)]
+
+AUTHOR: Kai Xuan <woxuankai@gmail.com>
 ENDOFUSAGE
 }
 
 
 # parse arguments
-while getopts 'f:l:m:t:s:w:' OPT
+while getopts 'f:l:m:t:s:w:d:h' OPT
 do
 	case $OPT in
 		f) # fixed image
@@ -24,7 +27,7 @@ do
 		m) # moving image
 			MOVING="$OPTARG"
 			;;
-		t) # transform basename
+		t) # transform basepath
 			TRANS="$OPTARG"
 			;;
 		s) # warped label (segment for target/fixed)
@@ -32,6 +35,13 @@ do
 			;;
 		w) # warped moving image
 			WMOVING="$OPTARG"
+			;;
+		d) # dimensionality
+			DIM="$OPTARG"
+			;;
+		h) # show help
+			usage
+			exit 0
 			;;
 		\?) # getopts error
 			usage
@@ -41,32 +51,38 @@ do
 done
 
 # verify arguments
-# test -f (with no arguments) will return true
-test -f "$FIXED" || \
-	{ echo "unable to find fixed image $FIXED"; usage;  exit 1; }
+test -r "$FIXED" || \
+	{ echo "unable to access $FIXED" >&2; usage;  exit 1; }
 
 test -f "$MOVING" || \
-	{ echo "unable to find moving image $MOVING"; usage; exit 1; }
+	{ echo "unable to access $MOVING" >&2; usage; exit 1; }
 
 test -f "$SEG" || \
-	{ echo "unable to find atlas lable $SEG"; usage; exit 1; }
+	{ echo "unable to access $SEG" >&2; usage; exit 1; }
 
 test -n "$WSEG" || \
-	{ echo "missing warped label filename (-t)"; usage; exit 1; }
-mkdir -p $(dirname "$WSEG")
+	{ echo "missing -s option" >&2; usage; exit 1; }
+mkdir -p $(dirname "$WSEG") || \
+	{ echo "unable to mkdir for $WSEG" >&2; exit 1; } 
 
 test -n "$TRANS" || \
-	{ echo "missing transform filename (-s)"; usage; exit 1; }
-mkdir -p $(dirname "$TRANS")
+	{ echo "missing -b option" >&2; usage; exit 1; }
+mkdir -p $(dirname "$TRANS") || \
+	{ echo "unable to mkdir for transformation" >&2; exit 1; }
 
 test -n "$WMOVING" || \
-	{ echo "missing warped moving image filename (-w)"; usage; exit 1; }
-mkdir -p $(dirname "$WMOVING")
+	{ echo "missing -w option" >&2; usage; exit 1; }
+mkdir -p $(dirname "$WMOVING") || \
+	{ echo "unable to mkdir for warped image" >&2; exit 1; }
+
+
+test "$DIM" -eq 2 || test "$DIM" -eq 3 || \
+	{ echo "-d should be either 2 or 3" >&2; exit 1; }
 
 # registration
 
 antsRegistration \
-	--verbose 0 --dimensionality 2 --float 0 \
+	--verbose 0 --dimensionality ${DIM} --float 0 \
 	--output "[${TRANS},${WMOVING}]" \
 	--interpolation Linear --use-histogram-matching 0 \
 	--winsorize-image-intensities '[0.005,0.995]' \
@@ -81,20 +97,20 @@ antsRegistration \
 	--convergence [1000x500x250x0,1e-6,10] \
 	--shrink-factors 8x4x2x1 \
 	--smoothing-sigmas 3x2x1x0vox \
-	--transform BSpline[0.5,400] \
+	--transform BSpline[0.1,400] \
 	--metric "CC[$FIXED,$MOVING,1,32]" \
 	--convergence [800x400x200x0,1e-6,10] \
 	--shrink-factors 8x4x2x1 \
 	--smoothing-sigmas 3x2x1x0vox \
-	|| { echo "Error!! failed to do registration"; exit 1;}
+	|| { echo "Error!! failed to do registration" >&2; exit 1;}
 
 # apply transform
 antsApplyTransforms \
-	-d 2 --float 0 \
+	-d ${DIM} --float 0 \
 	-i ${SEG} -r ${FIXED} -o ${WSEG} -n Linear \
 	-t ${TRANS}1BSpline.txt \
 	-t ${TRANS}0GenericAffine.mat \
-	|| { echo "Error!! fialed to apply transform"; exit 1;}
+	|| { echo "Error!! fialed to apply transform" >&2; exit 1;}
 
 exit 0;
 
