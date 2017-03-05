@@ -4,7 +4,12 @@
 
 SPEC='d0'
 VOL='v1'
-test $# -ge 2 && { SPEC="$1"; VOL=$2; }
+LN='4'
+JOBS='4'
+test $# -le 2 && { SPEC="$1"; VOL=$2; }
+test $# -le 3 && LN="$3"
+test $# -le 4 && JOBS="$4"
+
 
 TARGET="${SPEC}_${VOL}"
 PREDICTION="./output/${TARGET}_seg_prediction.nii.gz"
@@ -25,8 +30,8 @@ echo "altases argument ${ARG}"
 	-t "./data/${TARGET}.nii.gz" \
 	-p "${PREDICTION}" \
 	-v \
-	-j 4 \
-	-n 4 \
+	-j ${JOBS} \
+	-n ${LN} \
 	${ARG}
 
 LabelOverlapMeasures 2 "${PREDICTION}" "./data/${TARGET}_seg.nii.gz"
