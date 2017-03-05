@@ -28,7 +28,6 @@ FUSENUM=''
 DIM='2'
 
 
-
 # check software dependency
 which antsRegistration >/dev/null || \
 	echo "cannot find antsRegistration"
@@ -62,11 +61,17 @@ do
 		j) # parallel jobs
 			PARALLELJOBS="$OPTARG"
 			;;
-		v) # verbose
+		v) # verbose ####
 			VERBOSE=true
 			;;
 		n) # best n labels
 			FUSENUM="$OPTARG"
+			;;
+		f) # label fusion method ####
+			;;
+		s) # skip registration if possible  ####
+			;;
+		d) # show dice ####
 			;;
 		h) # help
 			usage

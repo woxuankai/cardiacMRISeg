@@ -6,6 +6,7 @@ doreg.sh
 	-f <fixed image (target)> -l <label of moving image (atlas seg)>
 	-m <moving image (atlas lable)> -t <transform basename>
 	-s <warped label (target seg)> -w <warped image>
+	-p <skip registration if possible (by comparing time)>
 ENDOFUSAGE
 }
 
