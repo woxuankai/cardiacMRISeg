@@ -25,7 +25,7 @@ PARALLELJOBS='3'
 DOREG='./doreg.sh'
 VERBOSE=false
 FUSENUM=''
-
+DIM='2'
 
 
 # check software dependency
@@ -134,7 +134,7 @@ do
 		-w '${WARPED_IMAGE}' \
 		\n"
 done
-test $VERBOSE && \
+$VERBOSE && \
 	{ echo "IFNO: doing registration"; SHOWBAR='--bar'; } || \
 	SHOWBAR=''
 # ignore non-empty line
@@ -173,17 +173,19 @@ done
 # sort
 SIMILARITY_GATE=$( echo ${SIMILARITIES[@]} | \
 	tr " " "\n" | sort -gr | cut -d$'\n' -f"${FUSENUM}" )
+
+$VERBOSE && echo "selected atlases:"
 LABELS_CHOSEN=() # sometimes number of chosen labels may be larger than FUSENUM
 for (( i = 0; i < ${#ATLAS_IMAGES[@]}; i++ ))
 do
 	test $(echo "${SIMILARITIES[${i}]} >= ${SIMILARITY_GATE}" | bc) \
 	       	-eq 1 && \
-		LABELS_CHOSEN[${#LABELS_CHOSEN[@]}]="${SIMILARITIES[${i}]}"
+		LABELS_CHOSEN[${#LABELS_CHOSEN[@]}]="${WARPED_LABELS[$i]}" && \
+		$VERBOSE && echo "${ATLAS_IMAGES[$i]}"
 done
-# echo "${LABELS_CHOSEN[@]}"
 
 # fuse
-ImageMath "${PREDICTION}" MajorityVoting ${LABELS_CHOSEN[@]} || \
+ImageMath "${DIM}" "${PREDICTION}" MajorityVoting ${LABELS_CHOSEN[@]} || \
 	{ echo "failed to do majority voting"; exit 1; }
 
 exit 0
