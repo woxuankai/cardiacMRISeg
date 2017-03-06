@@ -21,7 +21,7 @@ do
 		s) # reserved for slice
 			;;
 		v)
-			VOL="${$OPTARG}"
+			VOL="${OPTARG}"
 			;;
 		n)
 			LN="${OPTARG}"
@@ -64,14 +64,14 @@ do
 -i ./data/${BASENAME}.nii.gz -l ./data/${BASENAME}_seg.nii.gz"
 done
 
-test "$VERBOSE" -ge 1 && echo "altases argument ${ARG}"
+test "$VERBOSE" -ge 3 && echo "altases argument ${ARG}"
 
 ./multi_atlas_seg.sh \
 	-t "./data/${TARGET}.nii.gz" \
 	-p "${PREDICTION}" \
-	$( test "$VERBOSE" -ge 1 && echo '-v' ) \
-	-j ${JOBS} \
-	-n ${LN} \
+	-v "${VERBOSE}" \
+	-j "${JOBS}" \
+	-n "${LN}" \
 	${ARG} || \
 	{ echo "failed to do multi-atlas-segmentation" >&2; exit 1; }
 

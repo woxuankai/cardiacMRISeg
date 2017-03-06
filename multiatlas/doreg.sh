@@ -7,15 +7,16 @@ doreg.sh
 	-m <moving image (atlas lable)> -t <transform base path>
 	-s <warped label (target seg)> -w <warped image>
 	-d <dimensionality>
+	[-s <skip registration if possible, default 0>]
 	[-h (show help)]
 
 AUTHOR: Kai Xuan <woxuankai@gmail.com>
 ENDOFUSAGE
 }
 
-
+SKIP='0'
 # parse arguments
-while getopts 'f:l:m:t:s:w:d:h' OPT
+while getopts 'f:l:m:t:s:w:d:k:h' OPT
 do
 	case $OPT in
 		f) # fixed image
@@ -39,6 +40,9 @@ do
 		d) # dimensionality
 			DIM="$OPTARG"
 			;;
+		k) # skip if possible
+			SKIP="$OPTARG"
+			;;
 		h) # show help
 			usage
 			exit 0
@@ -54,10 +58,10 @@ done
 test -r "$FIXED" || \
 	{ echo "unable to access $FIXED" >&2; usage;  exit 1; }
 
-test -f "$MOVING" || \
+test -r "$MOVING" || \
 	{ echo "unable to access $MOVING" >&2; usage; exit 1; }
 
-test -f "$SEG" || \
+test -r "$SEG" || \
 	{ echo "unable to access $SEG" >&2; usage; exit 1; }
 
 test -n "$WSEG" || \
@@ -79,7 +83,25 @@ mkdir -p $(dirname "$WMOVING") || \
 test "$DIM" -eq 2 || test "$DIM" -eq 3 || \
 	{ echo "-d should be either 2 or 3" >&2; exit 1; }
 
+
+
 # registration
+if test "${SKIP}" -ge 1
+then
+	for OFILE in "${FIXED}" "${MOVING}" "${SEG}"
+	do
+		for NFILE in "${WSEG}" "${WMOVING}" \
+			"${TRANS}1BSpline.txt" "${TRANS}0GenericAffine.mat"
+		do
+			test -r "${NFILE}" && \
+				test -r "${OFILE}" && \
+				test "${NFILE}" -nt "${OFILE}" || \
+				SKIP=0
+		done
+	done
+fi
+# if every test passed, exit
+test "${SKIP}" -ge 1 && exit 0
 
 antsRegistration \
 	--verbose 0 --dimensionality ${DIM} --float 0 \

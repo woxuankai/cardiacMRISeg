@@ -17,23 +17,38 @@ do
 		{ echo "cannot execute $APP" >&2; exit 1; }
 done
 
+
 function usage(){
 	cat >&2 <<ENDOFUSAGE
 usage:
 multi_atlas_seg.sh
 	-t <target> -p <target_label_prediction>
 	[-n <best N labels used for label fusion>, default 4]
-	[-v verbose, default 0]
+	[-v verbose, default 0.
+		1: show selected atlases, 2: less, 3: more, 4: debug]
 	[-j parallel job number, default 4]
 	[-f fusion method, majoriyvote(default) or staple]
-	[-s skip registration if possible, default 0]
-	[-d <output file> calculate dice]
+	[-s skip if possible( according to file modification date), default 0]
 	[-h (help)]
 	-i <atlas_image1> -l <atlas_label1>
 	-i <atlas_image2> -l <atlas_label2>
 	...
 	-i <atlas_imageN> -l <atlas_labelN>
 ENDOFUSAGE
+}
+
+
+
+function report_parameters(){
+# report parameters
+	echo "number of atlases: ${#ATLAS_IMAGES[@]}"
+	echo "prediction       : ${PREDICTION}"
+	echo "target           : ${TARGET}"
+	echo "parallel jobs    : ${PARALLELJOBS}"
+	echo "verbose level    : ${VERBOSE}"
+	echo "number of fusion : ${FUSENUM}"
+	echo "fusion method    : ${FUSIONMETHOD}"
+	echo "skip if possible : ${SKIP}"
 }
 
 
@@ -48,8 +63,7 @@ PARALLELJOBS='3' # j
 VERBOSE=0 # v
 FUSENUM='4' # n
 FUSIONMETHOD='majorityvote' # f
-SKIPREG='1' # s
-DICEFILE='' # d
+SKIP='1' # s
 
 
 # parse arguments
@@ -81,10 +95,7 @@ do
 			FUSIONMETHOD="$OPTARG"
 			;;
 		s) # skip registration if possible
-			SKIPREG="$OPTARG"
-			;;
-		d) # show dice
-			DICEPATH="$OPTDICE"
+			SKIP="$OPTARG"
 			;;
 		h) # help
 			usage
@@ -115,7 +126,7 @@ test -n "$PREDICTION" || \
 	{ echo "label prediction (-p) not set" >&2; usage; exit 1; }
 
 # optional arguments
-test "$ARALLELJOBS" -gt 0 || \
+test "$PARALLELJOBS" -gt 0 || \
 	{ echo "parallel jobs (-j) should > 0" >&2; exit 1; }
 test "$VERBOSE" -ge 0 || \
 	{ echo "verbose (-j) option should >= 0" >&2; exit 1; }
@@ -124,24 +135,20 @@ test "$FUSENUM" -ge 2 && test "$FUSENUM" -le "${#ATLAS_LABELS[@]}" || \
 		exit 1; }
 test ${FUSIONMETHOD} = "majorityvote" || test ${FUSIONMETHOD} = "staple" || \
 	{ echo "invalid -f ${FUSIONMETHOD}" >&2; exit 1; }
-test ${SKIPREG} -ge 0 || \
-	{ echo "${SKIPREG} should >= 0" >&2; exit 1; }
-# DICEFILE
-test "${VERBOSE}" -ge 1 && \
-	echo ###############################
+test ${SKIP} -ge 0 || \
+	{ echo "skip (-s) should >= 0" >&2; exit 1; }
 
-# care only if set
-test "$FUSENUM" -gt 0 && test "$FUSENUM" -le "${#ATLAS_IMAGES[@]}" || \
-	{ echo "label number for fusion -n ${FUSENUM} \
-shoud > 0 and <= number of atlases ( ${#ATLAS_IMAGES[@]} )"; exit 1 ; }
-test "$PARALLELJOBS" -gt 0 || \
-	{ echo "invalid job number $PARALLELJOBS"; exit 1; }
-
+test "$VERBOSE" -ge 2 && report_parameters
+test "$VERBOSE" -ge 3 && \
+	echo "atlas images (in order): ${ATLAS_IMAGES[@]}" && \
+	echo "atlas labels (in order): ${ATLAS_LABELS[@]}"
+test "$VERBOSE" -ge 4 && set -x
 
 # get dimensionality
 DIM="$( ${FSLHD} ${TARGET} | fgrep -w 'dim0' | tr -s ' ' | cut -d' ' -f2 )"
 test "${DIM}" -ge 2 && test "${DIM}" -le 3 || \
 	{ echo "dimensionality not available" >&2 ; exit 1; }
+
 
 # do registration
 BASEPATH="$(dirname ${PREDICTION})/$(basename ${PREDICTION} | cut -d. -f1)"
@@ -154,41 +161,38 @@ do
 	WARPED_IMAGE="${BASEPATH}_warpedimage_${i}.nii.gz"
 	WARPED_LABEL="${BASEPATH}_warpedlabel_${i}.nii.gz"
 	TRANSFORM="${BASEPATH}_transform_${i}_"
-	rm -f "${WARPPED_IMAGE}" "${WARPED_LABEL}" "${TRANSFORM}"* || \
-		{ echo "unable to delete some existing file(s)"; exit 1; }
+	ATLAS_IMAGE="${ATLAS_IMAGES[$i]}"
+	ATLAS_LABEL="${ATLAS_LABELS[$i]}"
 	WARPED_IMAGES[${#WARPED_IMAGES[@]}]="$WARPED_IMAGE"
 	WARPED_LABELS[${#WARPED_LABELS[@]}]="$WARPED_LABEL"
 	PARALLELJOB_DOREG="${PARALLELJOB_DOREG} \
 		$DOREG \
 		-d '${DIM}' \
 		-f '${TARGET}' \
-		-l '${ATLAS_LABELS[$i]}' \
-		-m '${ATLAS_IMAGES[$i]}' \
+		-l '${ATLAS_LABEL}' \
+		-m '${ATLAS_IMAGE}' \
 		-t '${TRANSFORM}' \
 		-s '${WARPED_LABEL}' \
 		-w '${WARPED_IMAGE}' \
+		-k '${SKIP}' \
 		\n"
 done
-$VERBOSE && \
-	{ echo "IFNO: doing registration"; SHOWBAR='--bar'; } || \
-	SHOWBAR=''
+SHOWBAR=''
+test "${VERBOSE}" -ge 2 && \
+	{ echo "...doing registration"; SHOWBAR='--bar'; }
+test "${VERBOSE}" -ge 3 && echo -e "registration jobs \n ${PARALLELJOB_DOREG}"
 # ignore non-empty line
 # (which will also be considered as a command in parallel)
-echo -e "$PARALLELJOB_DOREG" | \
-	grep -v '^$' | \
-	parallel -j $PARALLELJOBS $SHOWBAR
-# check output which may imply if the registration succeeds.
-for (( i = 0; i < ${#WARPED_IMAGES[@]}; i++ ))
-do
-	test -r "${WARPED_IMAGES[${i}]}" && \
-		test -r "${WARPED_LABELS[${i}]}" || \
-		{ echo "registraion ${ATLAS_IMAGES[$i]} -> ${TARGET} failed"; \
-			exit 1; }
-done
+echo -e "$PARALLELJOB_DOREG" | 	grep -v '^$' | \
+	parallel --halt now,fail=1 -j $PARALLELJOBS $SHOWBAR || \
+	{ echo "failed to registration in one or more jobs" >&2; exit 1; }
+
 
 # label fusion
+test "${VERBOSE}" -ge 2 && echo "...Measuring and Selecting labels"
 # choose best n labels
 # compute and sort similarity
+# to be parallelized soon... (use seperate/one txt file to store result?)
 SIMILARITIES=()
 SIMILARITY_GATE=''
 PARALLELJOB_SORT=''
@@ -205,28 +209,29 @@ done
 SIMILARITY_GATE=$( echo ${SIMILARITIES[@]} | \
 	tr " " "\n" | sort -gr | cut -d$'\n' -f"${FUSENUM}" )
 
-$VERBOSE && echo "selected atlases:"
+test "$VERBOSE" -ge 1 && echo "similarity gatevalue: ${SIMILARITY_GATE}"
+test "$VERBOSE" -ge 1 && echo "selected atlases:"
 LABELS_CHOSEN=() # sometimes number of chosen labels may be larger than FUSENUM
 for (( i = 0; i < ${#ATLAS_IMAGES[@]}; i++ ))
 do
 	test $(echo "${SIMILARITIES[${i}]} >= ${SIMILARITY_GATE}" | bc) \
 	       	-eq 1 && \
 		LABELS_CHOSEN[${#LABELS_CHOSEN[@]}]="${WARPED_LABELS[$i]}" && \
-		$VERBOSE && echo "${ATLAS_IMAGES[$i]}"
+		test "$VERBOSE" -ge 1 && echo "${ATLAS_IMAGES[$i]}"
 done
 
 # fuse
 function majorityvote(){
 	ImageMath "${DIM}" "${PREDICTION}" \
 		MajorityVoting ${LABELS_CHOSEN[@]} || \
-		{ echo "failed to do majority voting"; exit 1; }
+		{ echo "failed to do majority voting" >&2; exit 1; }
 	}
 function staple(){
 	LABEL4D="${BASEPATH}_4D.nii.gz"
 	fsl5.0-fslmerge -t ${LABEL4D} ${LABELS_CHOSEN[@]} || \
-		{ echo "failed to merge to 4D label"; exit 1; }
+		{ echo "failed to merge to 4D label" >&2; exit 1; }
 	seg_LabFusion -in "${LABEL4D}" -STAPLE -out "${PREDICTION}" || \
-		{ echo "failed to do staple"; exit 1; }
+		{ echo "failed to do staple" >&2; exit 1; }
 	}
 staple
 
