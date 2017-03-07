@@ -4,6 +4,7 @@ function usage(){
 	cat >&2 << EOF
 $0 -d <digit, d?> -v <digit, v?> -n <digit, n labels to fuse>
 	[-j <digit, parallel jobs>] [-m <verbose level, more information>]
+	[-f <fusion method>
 	[-h <,help>]
 
 AUTHOR: Kai Xuan <woxuankai@gmail.com>
@@ -12,7 +13,8 @@ EOF
 
 JOBS='1'
 VERBOSE='0'
-while getopts 'd:s:v:n:j:m:h' OPT
+FUSIONMEHTOD='majorityvote'
+while getopts 'd:s:v:n:j:m:f:h' OPT
 do
 	case $OPT in
 		d)
@@ -31,6 +33,9 @@ do
 			;;
 		m)
 			VERBOSE="${OPTARG}";
+			;;
+		f)
+			FUSIONMETHOD="${OPTARG}"
 			;;
 		h)
 			usage
@@ -72,6 +77,7 @@ test "$VERBOSE" -ge 3 && echo "altases argument ${ARG}"
 	-v "${VERBOSE}" \
 	-j "${JOBS}" \
 	-n "${LN}" \
+	-f "${FUSIONMETHOD}" \
 	${ARG} || \
 	{ echo "failed to do multi-atlas-segmentation" >&2; exit 1; }
 

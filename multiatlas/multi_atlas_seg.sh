@@ -126,23 +126,24 @@ test -n "$PREDICTION" || \
 	{ echo "label prediction (-p) not set" >&2; usage; exit 1; }
 
 # optional arguments
-test "$PARALLELJOBS" -gt 0 || \
+test "${PARALLELJOBS}" -gt 0 || \
 	{ echo "parallel jobs (-j) should > 0" >&2; exit 1; }
-test "$VERBOSE" -ge 0 || \
+test "${VERBOSE}" -ge 0 || \
 	{ echo "verbose (-j) option should >= 0" >&2; exit 1; }
-test "$FUSENUM" -ge 2 && test "$FUSENUM" -le "${#ATLAS_LABELS[@]}" || \
+test "${FUSENUM}" -ge 2 && test "${FUSENUM}" -le "${#ATLAS_LABELS[@]}" || \
 	{ echo "fusenum (-n) should >=2 and <= ${#ATLASL_LABELS[@]}" >&2; 
 		exit 1; }
-test ${FUSIONMETHOD} = "majorityvote" || test ${FUSIONMETHOD} = "staple" || \
+test "${FUSIONMETHOD}" = "majorityvote" || \
+	test "${FUSIONMETHOD}" = "staple" || \
 	{ echo "invalid -f ${FUSIONMETHOD}" >&2; exit 1; }
-test ${SKIP} -ge 0 || \
+test "${SKIP}" -ge 0 || \
 	{ echo "skip (-s) should >= 0" >&2; exit 1; }
 
-test "$VERBOSE" -ge 2 && report_parameters
-test "$VERBOSE" -ge 3 && \
+test "${VERBOSE}" -ge 2 && report_parameters
+test "${VERBOSE}" -ge 3 && \
 	echo "atlas images (in order): ${ATLAS_IMAGES[@]}" && \
 	echo "atlas labels (in order): ${ATLAS_LABELS[@]}"
-test "$VERBOSE" -ge 4 && set -x
+test "${VERBOSE}" -ge 4 && set -x
 
 # get dimensionality
 DIM="$( ${FSLHD} ${TARGET} | fgrep -w 'dim0' | tr -s ' ' | cut -d' ' -f2 )"
@@ -217,7 +218,7 @@ do
 	test $(echo "${SIMILARITIES[${i}]} >= ${SIMILARITY_GATE}" | bc) \
 	       	-eq 1 && \
 		LABELS_CHOSEN[${#LABELS_CHOSEN[@]}]="${WARPED_LABELS[$i]}" && \
-		test "$VERBOSE" -ge 1 && echo "${ATLAS_IMAGES[$i]}"
+		test "$VERBOSE" -ge 1 && echo "${i}: ${ATLAS_IMAGES[$i]}"
 done
 
 # fuse
@@ -233,7 +234,19 @@ function staple(){
 	seg_LabFusion -in "${LABEL4D}" -STAPLE -out "${PREDICTION}" || \
 		{ echo "failed to do staple" >&2; exit 1; }
 	}
-staple
+
+case "$FUSIONMETHOD" in
+	staple)
+		staple
+		;;
+	majorityvote)
+		majorityvote
+		;;
+	\?)
+		echo "unknown fusion method" >&2
+		exit 1
+		;;
+esac
 
 exit 0
 
