@@ -109,13 +109,8 @@ antsRegistration \
 	--interpolation Linear --use-histogram-matching 0 \
 	--winsorize-image-intensities '[0.005,0.995]' \
 	--initial-moving-transform "[$FIXED,$MOVING,1]" \
-	--transform 'Rigid[0.1]' \
-	--metric "CC[$FIXED,$MOVING,1,4]" \
-	--convergence [1000x500x250x0,1e-6,10] \
-	--shrink-factors 8x4x2x1 \
-	--smoothing-sigmas 3x2x1x0vox \
 	--transform 'Affine[0.1]' \
-	--metric "CC[$FIXED,$MOVING,1,4]" \
+	--metric "MI[$FIXED,$MOVING,1,24]" \
 	--convergence [1000x500x250x0,1e-6,10] \
 	--shrink-factors 8x4x2x1 \
 	--smoothing-sigmas 3x2x1x0vox \
