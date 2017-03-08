@@ -14,7 +14,6 @@ else
 	echo "options:"
 	echo "-v: view result"
 	echo "-d: show dice value"
-	echo "-m: metric"
 	echo "-t: transform"
 	echo "target and atlas are expected in ./data/ folder"
 	exit 1
@@ -36,8 +35,8 @@ test "$DIM" -eq 2 || test "$DIM" -eq 3 || \
 shift;shift
 OPTVIEW=false
 OPTDICE=false
-METRIC="CC[$FIXED,$MOVING,1,4]"
-# METRIC="MI[$FIXED,$MOVING,1,32]"
+METRICCC="CC[$FIXED,$MOVING,1,4]"
+METRICMI="MI[$FIXED,$MOVING,1,24]"
 TRANSFORM="BSpline[0.1,200]"
 while getopts "vdm:t:" OPT
 do
@@ -47,9 +46,6 @@ do
 			;;
 		d)
 			OPTDICE=true
-			;;
-		m)
-			# METRIC=$OPTARG
 			;;
 		t)
 			TRANSFORM=$OPTARG
@@ -72,18 +68,13 @@ antsRegistration \
 	--interpolation Linear --use-histogram-matching 0 \
 	--winsorize-image-intensities '[0.005,0.995]' \
 	--initial-moving-transform "[$FIXED,$MOVING,1]" \
-	--transform 'Rigid[0.1]' \
-	--metric "${METRIC}" \
-	--convergence [1000x500x250x0,1e-6,10] \
-	--shrink-factors 8x4x2x1 \
-	--smoothing-sigmas 3x2x1x0vox \
 	--transform 'Affine[0.1]' \
-	--metric "${METRIC}" \
+	--metric "${METRICMI}" \
 	--convergence [1000x500x250x0,1e-6,10] \
 	--shrink-factors 8x4x2x1 \
 	--smoothing-sigmas 3x2x1x0vox \
         --transform ${TRANSFORM} \
-	--metric "${METRIC}" \
+	--metric "${METRICCC}" \
 	--convergence [800x400x200x0,1e-6,10] \
 	--shrink-factors 8x4x2x1 \
 	--smoothing-sigmas 3x2x1x0vox
