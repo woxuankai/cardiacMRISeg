@@ -1,4 +1,5 @@
 *.nii.gz
 **/output
+**/data
 *.png
 *.swp
