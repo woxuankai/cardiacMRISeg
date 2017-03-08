@@ -71,19 +71,40 @@ done
 
 test "$VERBOSE" -ge 3 && echo "altases argument ${ARG}"
 
-./multi_atlas_seg.sh \
+function dodice(){ # 1-> prediction 2->target  (file path)
+	LabelOverlapMeasures 2 "${1}" "${2}" | \
+		cut -d$'\n' -f6 | tr -s ' ' | \
+		cut -d' ' -f5 | echo -n "dice: $( cat - )" || \
+		{ echo "failed to measure dice" >&2; exit 1; }
+	return 0
+	}
+
+
+DOMAS='./multi_atlas_seg.sh \
 	-t "./data/${TARGET}.nii.gz" \
 	-p "${PREDICTION}" \
 	-v "${VERBOSE}" \
 	-j "${JOBS}" \
 	-n "${LN}" \
 	-f "${FUSIONMETHOD}" \
-	${ARG} || \
-	{ echo "failed to do multi-atlas-segmentation" >&2; exit 1; }
+	${ARG}'
 
-LabelOverlapMeasures 2 "${PREDICTION}" "./data/${TARGET}_seg.nii.gz" | \
-	cut -d$'\n' -f6 | tr -s ' ' | \
-	cut -d' ' -f5 | echo "dice: $( cat - )" || \
-	{ echo "failed to measure dice" >&2; exit 1; }
+if test "${VERBOSE}" -eq 1
+then
+	set -o pipefail
+	eval "${DOMAS}" | fgrep ".nii.gz" | tr ':' ' ' | \
+		{ while read ONESEG ONEIMG; \
+		do dodice "./output/${TARGET}_seg_prediction_warpedlabel_\
+${ONESEG}.nii.gz" "./data/${TARGET}_seg.nii.gz"; echo -e "\t${ONEIMG}"; done }
+	test "$?" -eq 0 || \
+		{ echo "failed to do multi-atlas-segmentation" >&2; exit 1; }
+	set +o pipefail
+else
+	eval "${DOMAS}" || \
+		{ echo "failed to do multi-atlas-segmentation" >&2; exit 1; }
+fi
+
+dodice "$PREDICTION" "./data/${TARGET}_seg.nii.gz"
+echo -e "\t$PREDICTION"
 
 exit 0;
