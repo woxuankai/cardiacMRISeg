@@ -7,12 +7,10 @@ if test $# -ge 2
 then
 	TARGET="$1"
 	ATLAS="$2"
-	DIM="$3"
 	echo "target image is $TARGET"
 	echo "altas is $ATLAS"
-	echo "dimentionality is $DIM"
 else
-	echo "usage: $0 <TargetName> <AtlasName> <dimensionality> [options]"
+	echo "usage: $0 <TargetName> <AtlasName> [options]"
 	echo "options:"
 	echo "-v: view result"
 	echo "-d: show dice value"
@@ -30,11 +28,12 @@ MOVING="./data/${ATLAS}.nii.gz"
 
 test -f "$FIXED" || { echo "cannot find $FIXED" ; exit 1; }
 test -f "$MOVING" || { echo "cannot find $MOVING" ; exit 1; }
+DIM=$(fsl5.0-fslhd "${FIXED}" | fgrep -w dim0 | tr -s ' ' | cut -d' ' -f2)
 test "$DIM" -eq 2 || test "$DIM" -eq 3 || \
 	{ echo "dimentionality should be either 2 or 3"; exit 1; }
 
 
-shift;shift;shift
+shift;shift
 OPTVIEW=false
 OPTDICE=false
 METRIC="CC[$FIXED,$MOVING,1,4]"
@@ -91,13 +90,13 @@ antsRegistration \
 
 antsApplyTransforms \
 	-d ${DIM} --float 0 \
-	-i ${SEGMENT} -r ${FIXED} -o ${SEGW} -n Linear \
+	-i ${SEGMENT} -r ${FIXED} -o ${SEGW} -n NearestNeighbor\
 	-t ${TRANS}1BSpline.txt \
 	-t ${TRANS}0GenericAffine.mat
 
 GOLDEN="./data/${TARGET}_seg.nii.gz"
 DICE="./output/dice_${TARGET}_prediction_from_${ATLAS}.txt"
-DOVIEW="fslview -m single ${FIXED} ${GOLDEN} -l Red -t 0.5 ${SEGW} -l Blue -t 0.5"
+DOVIEW="fslview -m single ${FIXED} ${ATLASW} -t 0.1 ${GOLDEN} -l Red -t 0.5 ${SEGW} -l Blue -t 0.5"
 DODICE="ImageMath ${DIM} $DICE DiceAndMinDistSum "$GOLDEN" "$SEGW""
 
 test $OPTDICE && {
