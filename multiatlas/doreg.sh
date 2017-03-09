@@ -114,8 +114,8 @@ antsRegistration \
 	--convergence [1000x500x250x0,1e-6,10] \
 	--shrink-factors 8x4x2x1 \
 	--smoothing-sigmas 3x2x1x0vox \
-	--transform BSpline[0.1,400] \
-	--metric "CC[$FIXED,$MOVING,1,32]" \
+	--transform BSpline[0.1,200] \
+	--metric "CC[$FIXED,$MOVING,1,4]" \
 	--convergence [800x400x200x0,1e-6,10] \
 	--shrink-factors 8x4x2x1 \
 	--smoothing-sigmas 3x2x1x0vox \
