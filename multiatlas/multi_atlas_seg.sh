@@ -211,14 +211,15 @@ SIMILARITY_GATE=$( echo ${SIMILARITIES[@]} | \
 	tr " " "\n" | sort -gr | cut -d$'\n' -f"${FUSENUM}" )
 
 test "$VERBOSE" -ge 1 && echo "similarity gatevalue: ${SIMILARITY_GATE}"
-test "$VERBOSE" -ge 1 && echo "selected atlases:"
+test "$VERBOSE" -ge 1 && echo "selected atlases and similarities:"
 LABELS_CHOSEN=() # sometimes number of chosen labels may be larger than FUSENUM
 for (( i = 0; i < ${#ATLAS_IMAGES[@]}; i++ ))
 do
 	test $(echo "${SIMILARITIES[${i}]} >= ${SIMILARITY_GATE}" | bc) \
 	       	-eq 1 && \
 		LABELS_CHOSEN[${#LABELS_CHOSEN[@]}]="${WARPED_LABELS[$i]}" && \
-		test "$VERBOSE" -ge 1 && echo "${i}: ${ATLAS_IMAGES[$i]}"
+		test "$VERBOSE" -ge 1 && \
+			echo "${i}: ${ATLAS_IMAGES[$i]} : ${SIMILARITIES[$i]}"
 done
 
 # fuse

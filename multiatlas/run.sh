@@ -4,7 +4,7 @@ function usage(){
 	cat >&2 << EOF
 $0 -d <digit, d?> -v <digit, v?> -n <digit, n labels to fuse>
 	[-j <digit, parallel jobs>] [-m <verbose level, more information>]
-	[-f <fusion method>
+	[-f <fusion method>]
 	[-h <,help>]
 
 AUTHOR: Kai Xuan <woxuankai@gmail.com>
@@ -13,7 +13,7 @@ EOF
 
 JOBS='1'
 VERBOSE='0'
-FUSIONMEHTOD='majorityvote'
+FUSIONMETHOD='staple'
 while getopts 'd:s:v:n:j:m:f:h' OPT
 do
 	case $OPT in
@@ -93,9 +93,10 @@ if test "${VERBOSE}" -eq 1
 then
 	set -o pipefail
 	eval "${DOMAS}" | fgrep ".nii.gz" | tr ':' ' ' | \
-		{ while read ONESEG ONEIMG; \
+		{ while read ONESEG ONEIMG ONESIM; \
 		do dodice "./output/${TARGET}_seg_prediction_warpedlabel_\
-${ONESEG}.nii.gz" "./data/${TARGET}_seg.nii.gz"; echo -e "\t${ONEIMG}"; done }
+${ONESEG}.nii.gz" "./data/${TARGET}_seg.nii.gz"; \
+			echo -e "\t${ONEIMG}\t"; done }
 	test "$?" -eq 0 || \
 		{ echo "failed to do multi-atlas-segmentation" >&2; exit 1; }
 	set +o pipefail
