@@ -1,5 +1,7 @@
 *.nii.gz
-**/output
-**/data
 *.png
 *.swp
+
+**/output
+**/data
+**/build
