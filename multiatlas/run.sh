@@ -2,7 +2,7 @@
 
 function usage(){
 	cat >&2 << EOF
-$0 -d <digit, d?> -v <digit, v?> -n <digit, n labels to fuse>
+$0 -d <digit, d?> -v <digit, v?> -s <digit, s?> -n <digit, n labels to fuse>
 	[-j <digit, parallel jobs>] [-m <verbose level, more information>]
 	[-f <fusion method>]
 	[-h <,help>]
@@ -20,10 +20,11 @@ do
 		d)
 			SPEC="$OPTARG"
 			;;
-		s) # reserved for slice
-			;;
 		v)
 			VOL="${OPTARG}"
+			;;
+		s)
+			SLICE="${OPTARG}"
 			;;
 		n)
 			LN="${OPTARG}"
@@ -46,17 +47,21 @@ do
 	esac
 done
 
-test "$SPEC" -ge 0 && test "${VOL}" -ge 0 || \
+test "$SPEC"  || \
 	{ echo "wrong -d or/and -v set" >&2 ; exit 1; }
 SPEC="d${SPEC}"
 VOL="v${VOL}"
+SLICE="s${SLICE}"
 test "$LN" -ge 2 || \
 	{ echo "-n should >= 2" >&2 ; exit 1; }
 test "${VERBOSE}" -ge 0 || \
 	{ echo "-v should >=0" >&2 ; exit 1; }
 
 
-TARGET="${SPEC}_${VOL}"
+TARGET="${SPEC}"
+test "${#VOL}" -ge 1 && TARGET="${TARGET}_${VOL}" && \
+test "${#SLICE}" -ge 1 && TARGET="${TARGET}_${SLICE}"
+
 PREDICTION="./output/${TARGET}_seg_prediction.nii.gz"
 test "$VERBOSE" -ge 1 &&  echo "target ${TARGET}"
 

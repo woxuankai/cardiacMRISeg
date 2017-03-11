@@ -201,21 +201,26 @@ PARALLELJOB_SORT=''
 for (( i = 0; i < ${#ATLAS_IMAGES[@]}; i++ ))
 do
 	# 1 for cross correlation
-	SIMILARITY=$( MeasureImageSimilarity ${DIM} 1 \
+# Metric
+# 0 - MeanSquareDifference
+# 1 - Cross-Correlation # fgrep => CC
+# 2-Mutual Information # fgrep => MI
+# 3-SMI 
+	SIMILARITY=$( MeasureImageSimilarity ${DIM} 2 \
 		${TARGET} ${WARPED_IMAGES[$i]} | \
-		fgrep '=> CC' | rev | cut -d' ' -f1 | rev )
+		fgrep '=> MI' | rev | cut -d' ' -f1 | rev )
 	SIMILARITIES[${#SIMILARITIES[@]}]="${SIMILARITY}"
 done
 # sort
 SIMILARITY_GATE=$( echo ${SIMILARITIES[@]} | \
-	tr " " "\n" | sort -gr | cut -d$'\n' -f"${FUSENUM}" )
+	tr " " "\n" | sort -g | cut -d$'\n' -f"${FUSENUM}" )
 
 test "$VERBOSE" -ge 1 && echo "similarity gatevalue: ${SIMILARITY_GATE}"
 test "$VERBOSE" -ge 1 && echo "selected atlases and similarities:"
 LABELS_CHOSEN=() # sometimes number of chosen labels may be larger than FUSENUM
 for (( i = 0; i < ${#ATLAS_IMAGES[@]}; i++ ))
 do
-	test $(echo "${SIMILARITIES[${i}]} >= ${SIMILARITY_GATE}" | bc) \
+	test $(echo "${SIMILARITIES[${i}]} <= ${SIMILARITY_GATE}" | bc) \
 	       	-eq 1 && \
 		LABELS_CHOSEN[${#LABELS_CHOSEN[@]}]="${WARPED_LABELS[$i]}" && \
 		test "$VERBOSE" -ge 1 && \

@@ -16,9 +16,9 @@ ROI='fsl5.0-fslroi'
 function doroi(){
 NUM_SLICE="$(getslicenum ${ATLAS_IMAGE})"
 NUM_VOLUME="$(getvolumenum ${ATLAS_IMAGE})"
-for ((i = 0; i <= $NUM_VOLUME; i++))
+for ((i = 0; i < $NUM_VOLUME; i++))
 do
-	for ((j = 0; j <= $NUM_SLICE; j++))
+	for ((j = 0; j < $NUM_SLICE; j++))
 	do
 		$ROI "${ATLAS_IMAGE}" \
 			"${OUTPUT_PREFIX}_v${i}_s${j}.nii.gz" \
