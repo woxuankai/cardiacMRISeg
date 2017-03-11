@@ -15,6 +15,7 @@ else
 	echo "-v: view result"
 	echo "-d: show dice value"
 	echo "-t: transform"
+	echo "-m: more information, verbose level"
 	echo "target and atlas are expected in ./data/ folder"
 	exit 1
 fi
@@ -33,8 +34,9 @@ test "$DIM" -eq 2 || test "$DIM" -eq 3 || \
 
 
 shift;shift
-OPTVIEW=false
-OPTDICE=false
+OPTVIEW=0
+OPTDICE=0
+VERBOSE=0
 METRICCC="CC[$FIXED,$MOVING,1,4]"
 METRICMI="MI[$FIXED,$MOVING,1,24]"
 TRANSFORM="BSpline[0.1,200]"
@@ -42,13 +44,16 @@ while getopts "vdm:t:" OPT
 do
 	case $OPT in
 		v)
-			OPTVIEW=true
+			OPTVIEW=1
 			;;
 		d)
-			OPTDICE=true
+			OPTDICE=1
 			;;
 		t)
 			TRANSFORM=$OPTARG
+			;;
+		m)
+			VERBOSE=$OPTARG
 			;;
 		\?)
 			;;
@@ -63,7 +68,7 @@ SEGW="./output/${TARGET}_seg_prediction_from_${ATLAS}.nii.gz"
 TRANS="./output/Transform_${ATLAS}_to_${TARGET}"
 ATLASW="./output/Warped${ATLAS}_for_${TARGET}.nii.gz"
 antsRegistration \
-	--verbose 0 --dimensionality ${DIM} --float 0 \
+	--verbose ${VERBOSE} --dimensionality ${DIM} --float 0 \
 	--output "[${TRANS},${ATLASW}]" \
 	--interpolation Linear --use-histogram-matching 0 \
 	--winsorize-image-intensities '[0.005,0.995]' \
@@ -80,7 +85,7 @@ antsRegistration \
 	--smoothing-sigmas 3x2x1x0vox
 
 antsApplyTransforms \
-	-d ${DIM} --float 0 \
+	-d ${DIM} --float 0 --verbose ${VERBOSE}\
 	-i ${SEGMENT} -r ${FIXED} -o ${SEGW} -n NearestNeighbor\
 	-t ${TRANS}1BSpline.txt \
 	-t ${TRANS}0GenericAffine.mat
@@ -90,11 +95,11 @@ DICE="./output/dice_${TARGET}_prediction_from_${ATLAS}.txt"
 DOVIEW="fslview -m single ${FIXED} ${ATLASW} -t 0.1 ${GOLDEN} -l Red -t 0.5 ${SEGW} -l Blue -t 0.5"
 DODICE="ImageMath ${DIM} $DICE DiceAndMinDistSum "$GOLDEN" "$SEGW""
 
-test $OPTDICE && {
+test $OPTDICE -gt 0 && {
 eval "$DODICE"
 echo " "
 echo -e "${DICE}\n" $(cat "$DICE"); }
 
-test $OPTVIEW && eval "$DOVIEW" &
+test $OPTVIEW -gt 0 && eval "$DOVIEW" &
 exit 0
 
