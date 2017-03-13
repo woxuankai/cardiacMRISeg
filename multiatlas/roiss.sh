@@ -42,7 +42,7 @@ doroi
 
 PAR='91 75  68 82'
 # x165 y149
-ATLAS_IMAGE='../data/ET0009301.nii.gz'
+ATLAS_IMAGE='../data/DET0009301.nii.gz'
 ATLAS_LABEL='../gt/DET0009301_seg.nii.gz'
 OUTPUT_PREFIX='./data/d1'
 doroi
