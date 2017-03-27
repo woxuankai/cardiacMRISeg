@@ -77,12 +77,12 @@ antsRegistration \
 	--metric "${METRICMI}" \
 	--convergence [1000x500x250x0,1e-6,10] \
 	--shrink-factors 8x4x2x1 \
-	--smoothing-sigmas 3x2x1x0vox \
+	--smoothing-sigmas 3x2x1x0mm \
         --transform ${TRANSFORM} \
 	--metric "${METRICCC}" \
 	--convergence [800x400x200x0,1e-6,10] \
 	--shrink-factors 8x4x2x1 \
-	--smoothing-sigmas 3x2x1x0vox
+	--smoothing-sigmas 3x2x1x0mm
 
 antsApplyTransforms \
 	-d ${DIM} --float 0 --verbose ${VERBOSE}\
@@ -92,8 +92,9 @@ antsApplyTransforms \
 
 GOLDEN="./data/${TARGET}_seg.nii.gz"
 DICE="./output/dice_${TARGET}_prediction_from_${ATLAS}.txt"
-DOVIEW="fslview -m single ${FIXED} ${ATLASW} -t 0.1 ${GOLDEN} -l Red -t 0.5 ${SEGW} -l Blue -t 0.5"
-DODICE="ImageMath ${DIM} $DICE DiceAndMinDistSum "$GOLDEN" "$SEGW""
+#DOVIEW="fslview -m single ${FIXED} ${ATLASW} -t 0.1 ${GOLDEN} -l Red -t 0.5 ${SEGW} -l Blue -t 0.5"
+DOVIEW="itksnap -g ${FIXED} -s ${ATLASW} -o ${SEGW}"
+DODICE="ImageMath ${DIM} $DICE DiceAndMinDistSum $GOLDEN $SEGW"
 
 test $OPTDICE -gt 0 && {
 eval "$DODICE"

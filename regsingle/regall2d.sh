@@ -1,5 +1,5 @@
 #!/bin/bash
-OPTS='-d'
+OPTS='-d -v'
 REG='./doreg.sh'
 
 #$REG d0 d1 $OPTS 2>/dev/null | grep -i dice &
