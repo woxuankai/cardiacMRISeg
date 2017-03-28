@@ -12,6 +12,7 @@ then
 else
 	echo "usage: $0 <TargetName> <AtlasName> [options]"
 	echo "options:"
+	echo "-k: skip registration (show results only)"
 	echo "-v: view result"
 	echo "-d: show dice value"
 	echo "-t: transform"
@@ -40,20 +41,23 @@ VERBOSE=0
 METRICCC="CC[$FIXED,$MOVING,1,4]"
 METRICMI="MI[$FIXED,$MOVING,1,24]"
 TRANSFORM="BSpline[0.1,200]"
-while getopts "vdm:t:" OPT
+while getopts "v:k:d:m:t:" OPT
 do
 	case $OPT in
 		v)
-			OPTVIEW=1
+			OPTVIEW="$OPTARG"
 			;;
 		d)
-			OPTDICE=1
+			OPTDICE="$OPTARG"
 			;;
 		t)
-			TRANSFORM=$OPTARG
+			TRANSFORM="$OPTARG"
 			;;
 		m)
-			VERBOSE=$OPTARG
+			VERBOSE="$OPTARG"
+			;;
+		k)
+			SKIP="$OPTARG"
 			;;
 		\?)
 			;;
@@ -67,6 +71,7 @@ SEGMENT="./data/${ATLAS}_seg.nii.gz"
 SEGW="./output/${TARGET}_seg_prediction_from_${ATLAS}.nii.gz"
 TRANS="./output/Transform_${ATLAS}_to_${TARGET}"
 ATLASW="./output/Warped${ATLAS}_for_${TARGET}.nii.gz"
+test "$SKIP" -gt 0 || \
 antsRegistration \
 	--verbose ${VERBOSE} --dimensionality ${DIM} --float 0 \
 	--output "[${TRANS},${ATLASW}]" \
@@ -84,6 +89,7 @@ antsRegistration \
 	--shrink-factors 8x4x2x1 \
 	--smoothing-sigmas 3x2x1x0mm
 
+test "$SKIP" -gt 0 || \
 antsApplyTransforms \
 	-d ${DIM} --float 0 --verbose ${VERBOSE}\
 	-i ${SEGMENT} -r ${FIXED} -o ${SEGW} -n NearestNeighbor\
@@ -93,14 +99,14 @@ antsApplyTransforms \
 GOLDEN="./data/${TARGET}_seg.nii.gz"
 DICE="./output/dice_${TARGET}_prediction_from_${ATLAS}.txt"
 #DOVIEW="fslview -m single ${FIXED} ${ATLASW} -t 0.1 ${GOLDEN} -l Red -t 0.5 ${SEGW} -l Blue -t 0.5"
-DOVIEW="itksnap -g ${FIXED} -s ${ATLASW} -o ${SEGW}"
+DOVIEW="itksnap -g ${FIXED} -s ${SEGW} -o ${ATLASW}"
 DODICE="ImageMath ${DIM} $DICE DiceAndMinDistSum $GOLDEN $SEGW"
 
-test $OPTDICE -gt 0 && {
+test "$OPTDICE" -gt 0 && {
 eval "$DODICE"
 echo " "
 echo -e "${DICE}\n" $(cat "$DICE"); }
 
-test $OPTVIEW -gt 0 && eval "$DOVIEW" &
+test "$OPTVIEW" -gt 0 && eval "$DOVIEW" &
 exit 0
 
