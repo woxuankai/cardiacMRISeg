@@ -38,6 +38,7 @@ shift;shift
 OPTVIEW=0
 OPTDICE=0
 VERBOSE=0
+SKIP=0
 METRICCC="CC[$FIXED,$MOVING,1,4]"
 METRICMI="MI[$FIXED,$MOVING,1,24]"
 TRANSFORM="BSpline[0.1,200]"
@@ -98,8 +99,9 @@ antsApplyTransforms \
 
 GOLDEN="./data/${TARGET}_seg.nii.gz"
 DICE="./output/dice_${TARGET}_prediction_from_${ATLAS}.txt"
-#DOVIEW="fslview -m single ${FIXED} ${ATLASW} -t 0.1 ${GOLDEN} -l Red -t 0.5 ${SEGW} -l Blue -t 0.5"
-DOVIEW="itksnap -g ${FIXED} -s ${SEGW} -o ${ATLASW}"
+hash fslview 2>/dev/null && \
+  DOVIEW="fslview -m single ${FIXED} ${ATLASW} -t 0.1 ${GOLDEN} -l Red -t 0.5 ${SEGW} -l Blue -t 0.5" || \
+  DOVIEW="itksnap -g ${FIXED} -s ${SEGW} -o ${ATLASW}"
 DODICE="ImageMath ${DIM} $DICE DiceAndMinDistSum $GOLDEN $SEGW"
 
 test "$OPTDICE" -gt 0 && {
