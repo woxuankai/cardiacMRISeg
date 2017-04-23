@@ -2,6 +2,9 @@
 
 function usage(){
 	cat >&2 << EOF
+An interface to easily invoke multi_atlas_seg.sh
+
+Usage:
 $0 -d <digit, d?> -v <digit, v?> -s <digit, s?> -n <digit, n labels to fuse>
 	[-j <digit, parallel jobs>] [-m <verbose level, more information>]
 	[-f <fusion method>]
@@ -48,14 +51,14 @@ do
 done
 
 test "$SPEC"  || \
-	{ echo "wrong -d or/and -v set" >&2 ; exit 1; }
+	{ echo "wrong -d or/and -v set" >&2 ; usage  ; exit 1; }
 SPEC="d${SPEC}"
 VOL="v${VOL}"
 SLICE="s${SLICE}"
 test "$LN" -ge 2 || \
-	{ echo "-n should >= 2" >&2 ; exit 1; }
+	{ echo "-n should >= 2" >&2 ; usage ; exit 1; }
 test "${VERBOSE}" -ge 0 || \
-	{ echo "-v should >=0" >&2 ; exit 1; }
+	{ echo "-v should >=0" >&2 ; usage ; exit 1; }
 
 
 TARGET="${SPEC}"
@@ -101,11 +104,10 @@ then
 	set -o pipefail
 	eval "${DOMAS}" | fgrep ".nii.gz" | tr ':' ' ' | \
 		{ while read ONESEG ONEIMG ONESIM; \
-		do dodice "./output/${TARGET}_seg_prediction_warpedlabel_\
-${ONESEG}.nii.gz" "./data/${TARGET}_seg.nii.gz"; \
+		do dodice "${ONESEG}" "data/${TARGET}_seg.nii.gz"; \
 			echo -e "\t${ONEIMG}\t"; done }
 	test "$?" -eq 0 || \
-		{ echo "failed to do multi-atlas-segmentation" >&2; exit 1; }
+		{ echo "failed to do multi-atlas-segmentation and/or dice" >&2; exit 1; }
 	set +o pipefail
 else
 	eval "${DOMAS}" || \
