@@ -30,10 +30,10 @@ multi_atlas_seg.sh
 	[-f fusion method, majoriyvote(default) or staple]
 	[-s skip if possible( according to file modification date), default 0]
 	[-h (help)]
-	-i <atlas_image1> -l <atlas_label1>
-	-i <atlas_image2> -l <atlas_label2>
+	-i <atlas_image1> -l <atlas_label1> -w <warped_image1> -a <warped_label1>
+	-i <atlas_image2> -l <atlas_label2> -w <warped_image2> -a <warped_label2>
 	...
-	-i <atlas_imageN> -l <atlas_labelN>
+	-i <atlas_imageN> -l <atlas_labelN> -w <warped_imageN> -a <warped_labelN>
 ENDOFUSAGE
 }
 
@@ -55,6 +55,8 @@ function report_parameters(){
 # mandatory arguments
 ATLAS_IMAGES=() # i
 ATLAS_LABELS=() # l
+WARPED_IMAGES=() # w
+WARPED_LABELS=() # a
 TARGET='' # t
 PREDICTION='' # p
 
@@ -67,7 +69,7 @@ SKIP='1' # s
 
 
 # parse arguments
-while getopts 't:p:i:l:j:n:v:f:s:d:h' OPT
+while getopts 't:p:i:l:j:n:v:f:s:d:hw:a:' OPT
 do
 	case $OPT in
 		t) # target
@@ -82,6 +84,12 @@ do
 		l) # label
 			ATLAS_LABELS[${#ATLAS_LABELS[@]}]="$OPTARG"
 			;;
+    w)
+      WARPED_IMAGES[${#WARPED_IMAGES[@]}]="$OPTARG"
+      ;;
+    a)
+      WARPED_LABELS[${#WARPED_LABELS[@]}]="$OPTARG"
+      ;;
 		j) # parallel jobs
 			PARALLELJOBS="$OPTARG"
 			;;
@@ -114,10 +122,10 @@ done
 # mandatory arguments
 # ATLAS_IMAGES=() 
 # ATLAS_LABELS=()
-test "${#ATLAS_IMAGES[@]}" -eq "${#ATLAS_LABELS[@]}" || \
-	{ echo "altas images and labels don't match" >&2; exit 1; }
-test "${#ATLAS_IMAGES[@]}" -ge 2 || \
-	{ echo "altas image and label not enough" >&2; exit 1; }
+test "${#ATLAS_IMAGES[@]}" -eq "${#ATLAS_LABELS[@]}" && \
+  test "${#ATLAS_IMAGES[@]}" -eq "${#WARPED_IMAGES[@]}" && \
+  test "${#ATLAS_LABELS[@]}" -eq "${#WARPED_LABELS[@]}" || \
+	{ echo "number of -i -l -w -a options don't match" >&2; exit 1; }
 # TARGET=''
 test -r "$TARGET" || \
 	{ echo "target (-t) not set or not accessable" >&2; usage; exit 1; }
@@ -131,7 +139,7 @@ test "${PARALLELJOBS}" -gt 0 || \
 test "${VERBOSE}" -ge 0 || \
 	{ echo "verbose (-j) option should >= 0" >&2; exit 1; }
 test "${FUSENUM}" -ge 2 && test "${FUSENUM}" -le "${#ATLAS_LABELS[@]}" || \
-	{ echo "fusenum (-n) should >=2 and <= ${#ATLASL_LABELS[@]}" >&2; 
+	{ echo "fusenum (-n) should >=2 and <= ${#ATLAS_LABELS[@]}" >&2; 
 		exit 1; }
 test "${FUSIONMETHOD}" = "majorityvote" || \
 	test "${FUSIONMETHOD}" = "staple" || \
@@ -155,17 +163,13 @@ test "${DIM}" -ge 2 && test "${DIM}" -le 3 || \
 BASEPATH="$(dirname ${PREDICTION})/$(basename ${PREDICTION} | cut -d. -f1)"
 PARALLELJOB_DOREG=''
 PARALLELJOB_APPLYT=''
-WARPED_IMAGES=()
-WARPED_LABELS=()
 for (( i = 0; i < ${#ATLAS_IMAGES[@]}; i++ ))
 do
-	WARPED_IMAGE="${BASEPATH}_warpedimage_${i}.nii.gz"
-	WARPED_LABEL="${BASEPATH}_warpedlabel_${i}.nii.gz"
+	WARPED_IMAGE="${WARPED_IMAGES[$i]}"
+	WARPED_LABEL="${WARPED_LABELS[$i]}"
 	TRANSFORM="${BASEPATH}_transform_${i}_"
 	ATLAS_IMAGE="${ATLAS_IMAGES[$i]}"
 	ATLAS_LABEL="${ATLAS_LABELS[$i]}"
-	WARPED_IMAGES[${#WARPED_IMAGES[@]}]="$WARPED_IMAGE"
-	WARPED_LABELS[${#WARPED_LABELS[@]}]="$WARPED_LABEL"
 	PARALLELJOB_DOREG="${PARALLELJOB_DOREG} \
 		$DOREG \
 		-d '${DIM}' \
@@ -224,7 +228,7 @@ do
 	       	-eq 1 && \
 		LABELS_CHOSEN[${#LABELS_CHOSEN[@]}]="${WARPED_LABELS[$i]}" && \
 		test "$VERBOSE" -ge 1 && \
-			echo "${i}: ${ATLAS_IMAGES[$i]} : ${SIMILARITIES[$i]}"
+			echo "${i}: ${WARPED_IMAGES[$i]} : ${SIMILARITIES[$i]}"
 done
 
 # fuse
@@ -234,7 +238,7 @@ function majorityvote(){
 		{ echo "failed to do majority voting" >&2; exit 1; }
 	}
 function staple(){
-	LABEL4D="${BASEPATH}_4D.nii.gz"
+	LABEL4D="${BASEPATH}_${FUSENUM}fuse_4D.nii.gz"
 	fsl5.0-fslmerge -t ${LABEL4D} ${LABELS_CHOSEN[@]} || \
 		{ echo "failed to merge to 4D label" >&2; exit 1; }
 	seg_LabFusion -in "${LABEL4D}" -STAPLE -out "${PREDICTION}" || \

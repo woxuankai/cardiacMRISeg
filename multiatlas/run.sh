@@ -71,7 +71,9 @@ for ONEATLAS in $ATLAS
 do
 	BASENAME=$(echo "$ONEATLAS" | cut -d'.' -f1)
 	ARG="${ARG} \
--i ./data/${BASENAME}.nii.gz -l ./data/${BASENAME}_seg.nii.gz"
+-i ./data/${BASENAME}.nii.gz -l ./data/${BASENAME}_seg.nii.gz \
+-w ./output/${TARGET}_warpedimage_${BASENAME}.nii.gz \
+-a ./output/${TARGET}_warpedlabel_${BASENAME}.nii.gz"
 done
 
 test "$VERBOSE" -ge 3 && echo "altases argument ${ARG}"
