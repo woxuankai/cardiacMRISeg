@@ -15,6 +15,6 @@
 	tested under 0.9.4, for staple label fusion only
 *	GNU Parallel  
 * python3
-* python3-matplotlib
+* python3-matplotlib  
   draw images needed for thesis
 
