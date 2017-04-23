@@ -1,6 +1,6 @@
 #	segmentation of dynamic cardiac MRI images using multi-altas method
 
-##	file layout
+##	project layout
 
 *	regsingle  
 	test files for better image regsitration
@@ -12,5 +12,9 @@
 	tested under commit 4f4677e37ff983b50ac45d7518ff6d15ce320bdd
 *	bash  
 *	nifty_seg  
-	tested under 0.9.4
+	tested under 0.9.4, for staple label fusion only
 *	GNU Parallel  
+* python3
+* python3-matplotlib
+  draw images needed for thesis
+
