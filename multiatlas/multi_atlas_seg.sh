@@ -28,6 +28,8 @@ multi_atlas_seg.sh
     1: show selected atlases, 2: less, 3: more, 4: debug]
   [-j parallel job number, default 4]
   [-f fusion method, majoriyvote(default) or staple]
+  [-c atlas chosen method, default 2.
+    0:MeanSquareDifference, 1:Cross-Correlation, 2:Mutual Information]
   [-s skip if possible( according to file modification date), default 0]
   [-h (help)]
   -i <atlas_image1> -l <atlas_label1> -w <warped_image1> -a <warped_label1>
@@ -65,11 +67,14 @@ PARALLELJOBS='3' # j
 VERBOSE=0 # v
 FUSENUM='4' # n
 FUSIONMETHOD='majorityvote' # f
+CHOSENMETHOD='2' # c
 SKIP='1' # s
 
+# atlas choose metric
+CHOSENMETHODNAMES=("MSQ" "CC" "MI")
 
 # parse arguments
-while getopts 't:p:i:l:j:n:v:f:s:d:hw:a:' OPT
+while getopts 't:p:i:l:j:n:v:f:s:d:hw:a:c:' OPT
 do
   case $OPT in
     t) # target
@@ -105,6 +110,9 @@ do
     s) # skip registration if possible
       SKIP="$OPTARG"
       ;;
+    c) # altas chosen method
+      CHOSENMETHOD="$OPTARG"
+      ;;
     h) # help
       usage
       exit 0;
@@ -134,6 +142,8 @@ test -n "$PREDICTION" || \
   { echo "label prediction (-p) not set" >&2; usage; exit 1; }
 
 # optional arguments
+test "${CHOSENMETHOD}" -ge 0 && test "${CHOSENMETHOD}" -le "2" || \
+  { echo "choose method (-c) should be 0 or 1 or 2" >&2; exit 1; }
 test "${PARALLELJOBS}" -gt 0 || \
   { echo "parallel jobs (-j) should > 0" >&2; exit 1; }
 test "${VERBOSE}" -ge 0 || \
@@ -202,42 +212,59 @@ SIMILARITIES=()
 SIMILARITY_GATE=''
 PARALLELJOB_SORT=''
 # compute
+CHOSENMETHODNAME="${CHOSENMETHODNAMES[${CHOSENMETHOD}]}"
 for (( i = 0; i < ${#ATLAS_IMAGES[@]}; i++ ))
 do
   SIMILARITYFILE="${WARPED_IMAGES[$i]}.similarity"
   if test "${SKIP}" -gt "0" && \
     test -r "${SIMILARITYFILE}" && \
-    test "${SIMILARITYFILE}" -nt "${WARPED_IMAGES[$i]}"
+    test "${SIMILARITYFILE}" -nt "${WARPED_IMAGES[$i]}" && \
+    grep "${CHOSENMETHODNAME}"':' "${SIMILARITYFILE}"
   then
-    SIMILARITY=$(cat "${SIMILARITYFILE}")
+    SIMILARITY=$(cat "${SIMILARITYFILE}" | grep "${CHOSENMETHODNAME}:" | \
+      cut -d':' -f2)
     test -z "${SIMILARITY}" && \
-      { echo "file ${SIMILARITYFILE} is empty!" >&2 ; exit 1; }
+      { echo "file ${SIMILARITYFILE} without ${CHOSENMETHODNAME} data" >&2 ; \
+        exit 1; }
   else
-# 1 for cross correlation
 # Metric
-# 0 - MeanSquareDifference
-# 1 - Cross-Correlation # fgrep => CC
+# 0-MeanSquareDifference # fgrep => MSQ
+# 1-Cross-Correlation # fgrep => CC
 # 2-Mutual Information # fgrep => MI
-# 3-SMI 
-    SIMILARITY=$( MeasureImageSimilarity ${DIM} 2 \
-      ${TARGET} ${WARPED_IMAGES[$i]} | \
-      fgrep '=> MI' | rev | cut -d' ' -f1 | rev )
+# 3-SMI # segmentation fault
+    SIMILARITY=$( MeasureImageSimilarity "${DIM}" "${CHOSENMETHOD}" \
+      "${TARGET}" "${WARPED_IMAGES[$i]}" | \
+      fgrep '=> '"${CHOSENMETHODNAME}" | rev | cut -d' ' -f1 | rev )
     test -z "${SIMILARITY}" && \
-     { echo "failed to measure similarity" >&2 ; exit 1; }
-    echo "${SIMILARITY}" >"$SIMILARITYFILE"
+      { echo "failed to measure similarity" >&2 ; exit 1; }
+    test "${SIMILARITYFILE}" -nt "${WARPED_IMAGES[$i]}" && \
+      echo "${CHOSENMETHODNAME}:${SIMILARITY}" >>"${SIMILARITYFILE}" || \
+      echo "${CHOSENMETHODNAME}:${SIMILARITY}" >"${SIMILARITYFILE}"
   fi
-  SIMILARITIES[${#SIMILARITIES[@]}]="${SIMILARITY}"
+  SIMILARITIES[$i]="${SIMILARITY}"
 done
 # sort
-SIMILARITY_GATE=$( echo ${SIMILARITIES[@]} | \
-  tr " " "\n" | sort -g | cut -d$'\n' -f"${FUSENUM}" )
+if test "${CHOSENMETHOD}" -eq 2
+then
+  SIMILARITY_GATE=$( echo "${SIMILARITIES[@]}" | \
+    tr " " "\n" | sort -g | cut -d$'\n' -f"${FUSENUM}" )
+else
+  SIMILARITY_GATE=$( echo ${SIMILARITIES[@]} | \
+    tr " " "\n" | sort -g -r | cut -d$'\n' -f"${FUSENUM}" )
+fi
 
 test "$VERBOSE" -ge 1 && echo "similarity gatevalue: ${SIMILARITY_GATE}"
 test "$VERBOSE" -ge 1 && echo "selected atlases and similarities:"
 LABELS_CHOSEN=() # sometimes number of chosen labels may be larger than FUSENUM
 for (( i = 0; i < ${#ATLAS_IMAGES[@]}; i++ ))
 do
-  test $(echo "${SIMILARITIES[${i}]} <= ${SIMILARITY_GATE}" | bc) \
+  if test "${CHOSENMETHOD}" -eq 2
+  then
+    _COMPARESYM='<='
+  else
+    _COMPARESYM='>='
+  fi
+  test $(echo "${SIMILARITIES[${i}]} ${_COMPARESYM} ${SIMILARITY_GATE}" | bc) \
           -eq 1 && \
     LABELS_CHOSEN[${#LABELS_CHOSEN[@]}]="${WARPED_LABELS[$i]}" && \
     test "$VERBOSE" -ge 1 && \
