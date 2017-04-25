@@ -17,6 +17,7 @@
 * sponge  
   you can find it in the package 'moreutils' in debian and many other OS
 * python3
+* python3-numpy
 * python3-matplotlib  
   draw images needed for thesis
 
