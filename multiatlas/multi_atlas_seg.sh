@@ -233,12 +233,15 @@ do
 # 2-Mutual Information # fgrep => MI
 # 3-SMI # segmentation fault
     SIMILARITY=$( MeasureImageSimilarity "${DIM}" "${CHOSENMETHOD}" \
-      "${TARGET}" "${WARPED_IMAGES[$i]}" | \
-      fgrep '=> '"${CHOSENMETHODNAME}" | rev | cut -d' ' -f1 | rev )
+        "${TARGET}" "${WARPED_IMAGES[$i]}" | \
+        fgrep '=> '"${CHOSENMETHODNAME}" | rev | cut -d' ' -f1 | rev )
     test -z "${SIMILARITY}" && \
-      { echo "failed to measure similarity" >&2 ; exit 1; }
+        { echo "failed to measure similarity" >&2 ; exit 1; }
     test -e "${SIMILARITYFILE}" && \
-      fgrep -v '=> '"${CHOSENMETHODNAME}" "${SIMILARITYFILE}" | \
+        test "${SIMILARITYFILE}" -ot "${WARPED_IMAGES[$i]}" && \
+        rm -rf "${SIMILARITYFILE}"
+    test -e "${SIMILARITYFILE}" && \
+        fgrep -v '=> '"${CHOSENMETHODNAME}" "${SIMILARITYFILE}" | \
           sponge "${SIMILARITYFILE}" 
     echo "${CHOSENMETHODNAME}:${SIMILARITY}" >>"${SIMILARITYFILE}"
   fi
