@@ -14,6 +14,9 @@
 *	nifty_seg  
 	tested under 0.9.4, for staple label fusion only
 *	GNU Parallel  
+* fsl
+*	fslview/itk-snap  
+  displaying results
 * sponge  
   you can find it in the package 'moreutils' in debian and many other OS
 * python3
