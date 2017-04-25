@@ -14,6 +14,8 @@
 *	nifty_seg  
 	tested under 0.9.4, for staple label fusion only
 *	GNU Parallel  
+* sponge  
+  you can find it in the package 'moreutils' in debian and many other OS
 * python3
 * python3-matplotlib  
   draw images needed for thesis

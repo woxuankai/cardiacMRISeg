@@ -55,8 +55,8 @@ test "$SPEC"  || \
 SPEC="d${SPEC}"
 VOL="v${VOL}"
 SLICE="s${SLICE}"
-test "$LN" -ge 2 || \
-	{ echo "-n should >= 2" >&2 ; usage ; exit 1; }
+test "$LN" -ge 1 || \
+	{ echo "-n should >= 1" >&2 ; usage ; exit 1; }
 test "${VERBOSE}" -ge 0 || \
 	{ echo "-v should >=0" >&2 ; usage ; exit 1; }
 
@@ -84,7 +84,7 @@ test "$VERBOSE" -ge 3 && echo "altases argument ${ARG}"
 function dodice(){ # 1-> prediction 2->target  (file path)
 	LabelOverlapMeasures 2 "${1}" "${2}" | \
 		cut -d$'\n' -f6 | tr -s ' ' | \
-		cut -d' ' -f5 | echo -n "dice: $( cat - )" || \
+		cut -d' ' -f5 | echo -n "dice:$( cat - )" || \
 		{ echo "failed to measure dice" >&2; exit 1; }
 	return 0
 	}
@@ -105,7 +105,7 @@ then
 	eval "${DOMAS}" | fgrep ".nii.gz" | tr ':' ' ' | \
 		{ while read ONESEG ONEIMG ONESIM; \
 		do dodice "${ONESEG}" "data/${TARGET}_seg.nii.gz"; \
-			echo -e "\t${ONEIMG}\t"; done }
+			echo -e ":${ONEIMG}"; done }
 	test "$?" -eq 0 || \
 		{ echo "failed to do multi-atlas-segmentation and/or dice" >&2; exit 1; }
 	set +o pipefail
@@ -115,6 +115,6 @@ else
 fi
 
 dodice "$PREDICTION" "./data/${TARGET}_seg.nii.gz"
-echo -e "\t$PREDICTION"
+echo -e ":$PREDICTION"
 
 exit 0;

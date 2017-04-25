@@ -148,8 +148,8 @@ test "${PARALLELJOBS}" -gt 0 || \
   { echo "parallel jobs (-j) should > 0" >&2; exit 1; }
 test "${VERBOSE}" -ge 0 || \
   { echo "verbose (-j) option should >= 0" >&2; exit 1; }
-test "${FUSENUM}" -ge 2 && test "${FUSENUM}" -le "${#ATLAS_LABELS[@]}" || \
-  { echo "fusenum (-n) should >=2 and <= ${#ATLAS_LABELS[@]}" >&2; 
+test "${FUSENUM}" -ge 1 && test "${FUSENUM}" -le "${#ATLAS_LABELS[@]}" || \
+  { echo "fusenum (-n) should >=1 and <= ${#ATLAS_LABELS[@]}" >&2; 
     exit 1; }
 test "${FUSIONMETHOD}" = "majorityvote" || \
   test "${FUSIONMETHOD}" = "staple" || \
@@ -237,9 +237,10 @@ do
       fgrep '=> '"${CHOSENMETHODNAME}" | rev | cut -d' ' -f1 | rev )
     test -z "${SIMILARITY}" && \
       { echo "failed to measure similarity" >&2 ; exit 1; }
-    test "${SIMILARITYFILE}" -nt "${WARPED_IMAGES[$i]}" && \
-      echo "${CHOSENMETHODNAME}:${SIMILARITY}" >>"${SIMILARITYFILE}" || \
-      echo "${CHOSENMETHODNAME}:${SIMILARITY}" >"${SIMILARITYFILE}"
+    test -e "${SIMILARITYFILE}" && \
+      fgrep -v '=> '"${CHOSENMETHODNAME}" "${SIMILARITYFILE}" | \
+          sponge "${SIMILARITYFILE}" 
+    echo "${CHOSENMETHODNAME}:${SIMILARITY}" >>"${SIMILARITYFILE}"
   fi
   SIMILARITIES[$i]="${SIMILARITY}"
 done
