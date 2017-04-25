@@ -8,20 +8,23 @@ import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
     if(len(sys.argv) < 2):
-        print('usage: '+sys.argv[0]+' file.csv')
-        sys.exit(1)
-    with open(sys.argv[1], newline='') as f:
-        reader = csv.reader(f)
-        csvhead = next(reader)
-        target=[]
-        num=[]
-        MV=[]
-        STAPLE=[]
-        for oneline in reader:
-            MV.append(float(oneline[csvhead.index('MV')]))
-            STAPLE.append(float(oneline[csvhead.index('STAPLE')]))
-            target.append(oneline[csvhead.index('target')])
-            num.append(oneline[csvhead.index('num')])
+        print("reading from stdin...")
+        f=sys.stdin.readlines()
+    else:
+        f=open(sys.argv[1], newline='')
+    reader = csv.reader(f)
+    csvhead = next(reader)
+    target=[]
+    num=[]
+    MV=[]
+    STAPLE=[]
+    for oneline in reader:
+        MV.append(float(oneline[csvhead.index('MV')]))
+        STAPLE.append(float(oneline[csvhead.index('STAPLE')]))
+        target.append(oneline[csvhead.index('target')])
+        num.append(oneline[csvhead.index('num')])
+    if(type(f) != type([])): # if f is a description
+        f.close()
     MV=np.array(MV)
     STAPLE=np.array(STAPLE)
     num=np.array(num)
