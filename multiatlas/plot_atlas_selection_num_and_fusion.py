@@ -14,41 +14,26 @@ if __name__ == '__main__':
         reader = csv.reader(f)
         csvhead = next(reader)
         target=[]
-        atlas_img=[]
-        dice=[]
-        MI=[]
-        CC=[]
-        MSQ=[]
+        num=[]
+        MV=[]
+        STAPLE=[]
         for oneline in reader:
-            dice.append(float(oneline[csvhead.index('dice')]))
-            MI.append(float(oneline[csvhead.index('MI')]))
-            CC.append(float(oneline[csvhead.index('CC')]))
-            MSQ.append(float(oneline[csvhead.index('MSQ')]))
+            MV.append(float(oneline[csvhead.index('MV')]))
+            STAPLE.append(float(oneline[csvhead.index('STAPLE')]))
             target.append(oneline[csvhead.index('target')])
-            atlas_img.append(oneline[csvhead.index('atlas_img')])
-        dice=np.array(dice)
-        MI=np.array(MI)
-        CC=np.array(CC)
-        MSQ=np.array(MSQ)
+            num.append(oneline[csvhead.index('num')])
+    MV=np.array(MV)
+    STAPLE=np.array(STAPLE)
+    num=np.array(num)
     if(target.count(target[0]) != len(target)):
         print('targets not all the same')
         sys.exit(1)
     plt.figure(1)
-    plt.plot(MI,dice,'ro')
+    plt.plot(num,MV,'*-r', label='majority vote')
+    plt.plot(num,STAPLE,'+-b', label='STAPLE')
+    plt.legend(loc='upper right')
     plt.title('target: '+target[1])
-    plt.xlabel('Mutual Information')
-    plt.ylabel('dice')
-    
-    plt.figure(2)
-    plt.plot(CC,dice,'ro')
-    plt.title('target: '+target[1])
-    plt.xlabel('Cross Correlation')
-    plt.ylabel('dice')
-   
-    plt.figure(3)
-    plt.plot(MSQ,dice,'ro')
-    plt.title('target: '+target[1])
-    plt.xlabel('Mean Square Difference')
+    plt.xlabel('number of atlases chosen for label fusion')
     plt.ylabel('dice')
     plt.show()
 
