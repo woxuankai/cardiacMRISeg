@@ -91,7 +91,7 @@ then
 	for OFILE in "${FIXED}" "${MOVING}" "${SEG}"
 	do
 		for NFILE in "${WSEG}" "${WMOVING}" \
-			"${TRANS}1BSpline.txt" "${TRANS}0GenericAffine.mat"
+			#"${TRANS}1BSpline.txt" "${TRANS}0GenericAffine.mat"
 		do
 			test -r "${NFILE}" && \
 				test -r "${OFILE}" && \

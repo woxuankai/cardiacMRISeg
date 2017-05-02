@@ -7,6 +7,10 @@ do
 		for k in 8 7
 		do
 			./run.sh -d${i} -v${j} -s${k} -j4 -n5 -m1
+      test -e "./output/d${i}_v${j}_s${k}-n.csv" || \
+          { ./gen_csv_atlas_selection_num_and_fusion.sh "d${i}_v${j}_s${k}" > "./output/d${i}_v${j}_s${k}-n.csv" ; }
+      test -e "./output/d${i}_v${j}_s${k}-m.csv" || \
+          { ./gen_csv_atlas_selection_method.sh "d${i}_v${j}_s${k}" > "./output/d${i}_v${j}_s${k}-m.csv" ; }
 		done
 	done
 done

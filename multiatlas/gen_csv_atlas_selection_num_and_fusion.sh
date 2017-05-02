@@ -14,7 +14,7 @@ TARGET="$1"
 
 echo "target,num,MV,STAPLE"
 
-for NUM in $(seq 1 20)
+for NUM in $(seq 1 50)
 do
   D=$(echo ${TARGET} | cut -d'_' -f 1)
   V=$(echo ${TARGET} | cut -d'_' -f 2)

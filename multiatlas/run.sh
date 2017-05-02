@@ -65,7 +65,7 @@ TARGET="${SPEC}"
 test "${#VOL}" -ge 1 && TARGET="${TARGET}_${VOL}" && \
 test "${#SLICE}" -ge 1 && TARGET="${TARGET}_${SLICE}"
 
-PREDICTION="./output/${TARGET}_seg_prediction.nii.gz"
+PREDICTION="./output/${TARGET}_seg_${LN}_${FUSIONMETHOD}_prediction.nii.gz"
 test "$VERBOSE" -ge 1 &&  echo "target ${TARGET}"
 
 ATLAS=$(ls ./data | fgrep -v ${SPEC} | fgrep -v seg)
