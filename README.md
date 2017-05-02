@@ -6,7 +6,7 @@
 	test files for better image regsitration
 *	multiatlas  
 	muti-atlas including alta selection and label fusion
-* thesis
+* thesis  
   my bachelor's thesis written in tex
 			
 ##	dependency 
@@ -25,6 +25,6 @@
 * python3-numpy
 * python3-matplotlib  
   draw images needed for thesis
-* latex
+* latex  
   to compile thesis
 
