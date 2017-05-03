@@ -19,3 +19,4 @@ find . -name "*.lof"  | xargs rm -f
 find . -name "*.lot"  | xargs rm -f
 find . -name "*.alg"  | xargs rm -f
 find . -name "*.glsdefs"  | xargs rm -f
+find . -name "*.log"  | xargs rm -f

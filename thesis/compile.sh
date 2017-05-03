@@ -1,5 +1,5 @@
-export TEXINPUTS=./dependencies//:
-export TEXMFDBS=./dependencies:
+#export TEXINPUTS=./dependencies//:
+#export TEXMFDBS=./dependencies:
 jobname=thesis
 ./clean.sh
 rm $jobname.pdf
