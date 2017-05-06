@@ -1015,7 +1015,10 @@ pdfdisplaydoctitle=true
 \renewcommand{\CTEX@figurename}{Figure}
 \renewcommand{\CTEX@tablename}{Table}
 
+\setcounter{tocdepth}{-1}
 \include{contents/original}
+\setcounter{tocdepth}{3}
+
 \newpage
 \phantomsection
 \addcontentsline{toc}{chapter}{外文资料译文}
@@ -1027,7 +1030,9 @@ pdfdisplaydoctitle=true
 
 \setcounter{chapter}{0}
 
+\setcounter{tocdepth}{-1}
 \include{contents/translation}
+\setcounter{tocdepth}{3}
 }
 {
 \ifdef{\usecv@uestcthesis}{\usecv@uestcthesis}{
