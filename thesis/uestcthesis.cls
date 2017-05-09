@@ -978,65 +978,56 @@ pdfdisplaydoctitle=true
 \renewcommand{\chaptermark}[1]{\markboth{\CTEX@appendixname\Alph{chapter}~  #1 }{}}%附录页眉设置
 \input{contents/appendix.tex}%插入附录内容
 \clearpage
+\ifdefstring{\degree@uestcthesis}{bachelor}{
 
-\ifdefstring{\degree@uestcthesis}{bachelor}{%本科生需翻译一篇文献
-  \gdef\thechapter{\@arabic \c@chapter}
-  
-  \CTEXsetup[ name={,},
-    number={}
-    ]{chapter}
+\gdef\thechapter{\@arabic \c@chapter}
 
-  \def\Hy@org@chapter[#1]#2{%
-    \ifnum \c@secnumdepth >\m@ne \if@mainmatter \refstepcounter {chapter}
-    \typeout {\CTEXthechapter }\else \fi \else \fi \chaptermark {#1}\addtocontents{lof}
-    {\protect \addvspace {10\p@ }}\addtocontents {lot}{\protect \addvspace {10\p@ }}
-    \if@twocolumn \@topnewpage [\@makechapterhead {#2}]
-    \else
-    \@makechapterhead {#2}
-    \@afterheading \fi
-  }
+\CTEXsetup[ name={,},
+  number={}
+  ]{chapter}
 
-  \def\H@old@sect #1#2#3#4#5#6[#7]#8{\ifnum #2>\c@secnumdepth \let \@svsec \@empty
-  \else \refstepcounter {#1}\protected@edef \@svsec {\@seccntformat {#1}\relax }\fi
-  \@tempskipa #5\relax \ifdim \@tempskipa >\z@ \begingroup #6{\@hangfrom {\hskip #3
-  \relax \@svsec }\interlinepenalty \@M \csname CTEX@#1@titleformat\endcsname #8
-  \@@par }\endgroup \csname #1mark\endcsname {#7}\else \def \@svsechd
-  {#6{\hskip #3\relax \@svsec \csname CTEX@#1@titleformat\endcsname #8}\csname #1mark
-  \endcsname {#7}}\fi \@xsect {#5}}
+\setcounter{chapter}{0}
 
-  {
-    \newpage
-    %\renewcommand{\chaptermark}[1]{\markboth{外文资料原文}{}}
-    \def\leftmark{外文资料原文}
-    \phantomsection
-    \addcontentsline{toc}{chapter}{外文资料原文}
+\def\Hy@org@chapter[#1]#2{%
+\ifnum \c@secnumdepth >\m@ne \if@mainmatter \refstepcounter {chapter}
+\typeout {\CTEXthechapter }\else \fi \else \fi \chaptermark {#1}\addtocontents{lof}
+{\protect \addvspace {10\p@ }}\addtocontents {lot}{\protect \addvspace {10\p@ }}
+\if@twocolumn \@topnewpage [\@makechapterhead {#2}]
+\else
+\@makechapterhead {#2}
+\@afterheading \fi
+}
 
-    \renewcommand{\CTEX@figurename}{Figure}
-    \renewcommand{\CTEX@tablename}{Table}
+\def\H@old@sect #1#2#3#4#5#6[#7]#8{\ifnum #2>\c@secnumdepth \let \@svsec \@empty
+\else \refstepcounter {#1}\protected@edef \@svsec {\@seccntformat {#1}\relax }\fi
+\@tempskipa #5\relax \ifdim \@tempskipa >\z@ \begingroup #6{\@hangfrom {\hskip #3
+\relax \@svsec }\interlinepenalty \@M \csname CTEX@#1@titleformat\endcsname #8
+\@@par }\endgroup \csname #1mark\endcsname {#7}\else \def \@svsechd
+ {#6{\hskip #3\relax \@svsec \csname CTEX@#1@titleformat\endcsname #8}\csname #1mark
+ \endcsname {#7}}\fi \@xsect {#5}}
 
-    %\chapter{外文资料原文}
-    \setcounter{chapter}{0}
-    \setcounter{tocdepth}{-1}
-    \include{contents/original}
-    \setcounter{tocdepth}{3}
-  }
+\renewcommand{\chaptermark}[1]{\markboth{外文资料原文}{}}
+\def\leftmark{外文资料原文}
+\newpage
+\phantomsection
+\addcontentsline{toc}{chapter}{外文资料原文}
 
-  {
-    \newpage
-    %\renewcommand{\chaptermark}[1]{\markboth{外文资料译文}{}}
-    \def\leftmark{外文资料译文}
-    \phantomsection
-    \addcontentsline{toc}{chapter}{外文资料译文}
-    
-    \renewcommand{\CTEX@figurename}{图}
-    \renewcommand{\CTEX@tablename}{表}
+\renewcommand{\CTEX@figurename}{Figure}
+\renewcommand{\CTEX@tablename}{Table}
 
-    %\chapter{外文资料译文}
-    \setcounter{chapter}{0}
-    \setcounter{tocdepth}{-1}
-    \include{contents/translation}
-    \setcounter{tocdepth}{3}
-  }
+\include{contents/original}
+\newpage
+\phantomsection
+\addcontentsline{toc}{chapter}{外文资料译文}
+\renewcommand{\chaptermark}[1]{\markboth{外文资料译文}{}}
+\def\leftmark{外文资料译文}
+
+\renewcommand{\CTEX@figurename}{图}
+\renewcommand{\CTEX@tablename}{表}
+
+\setcounter{chapter}{0}
+
+\include{contents/translation}
 }
 {
 \ifdef{\usecv@uestcthesis}{\usecv@uestcthesis}{
