@@ -27,6 +27,10 @@ do
 			"${OUTPUT_PREFIX}_v${i}_s${j}_seg.nii.gz" \
 			$PAR ${j} 1 ${i} 1
 	done
+  cat << EOF > "${OUTPUT_PREFIX}.info"
+NUM_SLICE=${NUM_SLICE}
+NUM_VOLUME=${NUM_VOLUME}
+EOF
 done
 }
 
