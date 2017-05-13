@@ -120,7 +120,7 @@ antsRegistration \
 	--shrink-factors 8x4x2x1 \
 	--smoothing-sigmas 3x2x1x0vox \
 	--transform BSpline[0.1,200] \
-	--metric "MI[$FIXED,$MOVING,1,32]" \
+	--metric "CC[$FIXED,$MOVING,1,4]" \
 	--convergence [1000x500x250x100,1e-6,10] \
 	--shrink-factors 8x4x2x1 \
 	--smoothing-sigmas 3x2x1x0vox \
