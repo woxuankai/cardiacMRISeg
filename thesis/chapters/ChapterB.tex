@@ -11,25 +11,31 @@
 会导致成像结果的差异。
 而在实际中，将不同的医学图像进行观察，是比较常见的。例如：
 \begin{enumerate}
-  \item 在数字剪影血管造影(DSA)中，需要将注射造影剂之前和之后的图像进行相减。
+  \item 在数字剪影血管造影(DSA)中，将注射造影剂之前和之后的图像进行相减。
   \item 将患者某一部位的影像和标准影像进行对比。
   \item 将功能成像（例如正电子发射成像，PET）%
     和解剖成像（例如磁共振图像，MRI）综合观察。
 \end{enumerate}
-如果我们想要综合不同图像进行观察，首先要做的就是将图像``对齐''，
-这种所谓的对齐，便是图像配准。
+如果我们想要综合不同图像进行观察，首先要做的就是将图像``对齐''
+，这种所谓的对齐，便是图像配准
+\footnote{这里使用了``对齐''这一说法，其实并不准确。
+因为``对齐''字面上可能让人误以为只发生平移变换，
+而实际上，为了使一幅图像与另一幅图像尽可能吻合，
+还需要用到旋转、缩放等等变换。
+在实际的配准过程中，这种对齐甚至可以包括仿射变换以及非刚性变换}。
 
 总的来说，配准，是一个在不同图像之间建立空间上的联系的过程\citeup{MultiAtlasSurvey}，
 图\ref{RegistrationIsMapping}形象阐释了这一概念。
-\pic[h]{配准是在图像之间建立空间变换\citeup{itkbook2}}{width=0.6\textwidth}{RegistrationIsMapping}
+\pic[ht]{配准是在图像之间建立空间变换\citeup{itkbook2}}{width=0.6\textwidth}{RegistrationIsMapping}
 
 图像配准是医学图像处理分析的重要一环，
-同时也是该领域的一个热门研究方向。
+是该领域的一个热门研究方向。
 此外，除了医学图像处理方向，在其它图像处理领域，图像配准也有广泛的应用。
 
 \subsection{配准分类}
+\pic[ht]{二维配准的一个例子\citeup{RegistrationSurvey}}{width=0.7\textwidth}{2DTransformation}
 根据文献\cite{RegistrationSurvey,RegistrationSurveyNew}，
-配准的分类标准大概有以下几项：
+配准的分类标准有以下几项：
 \begin{enumerate}
   \item 图像维度：二维图像配准，三维图像配准等。
   \item 配准特征：
@@ -39,28 +45,55 @@
   \item 图像形变：分为刚性变换，放射变换，投射变换和曲线变换。
   \item 变换域：分为局部变换和全局变换。
     图\ref{2DTransformation}对变换域和图像形变有形象的展示。
-  \item 交互性：分为手动，半自动，全自动配准。
+  \item 交互性：分为交互式，半自动，全自动配准。
   \item 优化过程：分为直接计算变换参数和搜寻最优参数。
   \item 模态(modality)：分为多模态，单模态，对模型配准和对患者配准。
   \item 主体(subject)：同一患者的图像(intrasubject)，
     不同患者的图像(intersubject)，患者图像与图谱(atlas)
   \item 对象(object)：包括头胸腹肢体等等。
 \end{enumerate}
-\pic[h]{二维配准的一个例子\citeup{RegistrationSurvey}}{width=0.7\textwidth}{2DTransformation}
 
-在这篇文章中，我们主要关注的是全自动的心脏单模态图像非刚性配准。
+在这篇文章中，我们主要关注的是全自动的单模态心脏图像非刚性配准。
 
 \subsection{配准框架}
-图像配准的计算机全自动实现方法，实际上是一个不断迭代的优化过程。
+考虑在两幅图像间配准的情况，
+通常一幅图像被称为原图像(source image)或者固定图像(fixed image)，
+另一幅图像被称为目标图像(target image)或者浮动图像(moving image)。
+用$S$表示固定图像，$T$指代浮动图像，
+两幅定义域为$\Omega$的图像通过变换$W$相关联。
+配准的目的就是估计出一个最佳的的变换$W$来优化以下这个形式的能量函数
+\citeup{DeformableRegistrationSurvey}。
+$$\mathcal{M}(T,S\circ W)+\mathcal{R}(W)$$
+函数由两部分组成，
+第一部分刻画了T和用W变换后的S的``对齐''程度，
+这就带来了一个优化问题，最大化还是最小化取决于$\mathcal{M}$的定义。
+如果有对变换的先验知识，式子的后一项$\mathcal{R}(W)$，
+引入了对变换$W$的一个偏好。
 
-一个典型的配准框架如图\ref{RegistrationFramework}所示
-\pic[h]{一个典型的配准框架\citeup{itkbook2}}{width=0.8\textwidth}{RegistrationFramework}
+%一个典型的图像配准算法，一般由一下几个部分组成：
+%\begin{enumerate}
+%  \item 浮动图像(floating image)：被配准的图像。
+%  \item 固定图像(fixed image)：被形变的图像，配准的目的是尽量
+%\end{enumerate}
+%Image registration involves deforming
+%(or warping) one or more images to maximize an objective function
+%that combines a metric of spatial alignment with a regularizer that
+%quantifies the plausibility of the deformation.
 
-landmark\par
+于是，配准问题转化成为了以下问题
+$$W^\ast=arg \ max \ \mathcal{M}(T,S\circ W)+\mathcal{R}(W)$$
+此处我们假设图像越相似，$\mathcal{M}$越大。
+
+对于这样一个优化问题，一般很难直接求解$W$，
+只能通过一个不断迭代的过程来优化。
+
+一个典型的配准框架如图\ref{RegistrationFramework}所示。
+\pic[ht]{一个典型的配准框架\citeup{itkbook2}}{width=0.8\textwidth}{RegistrationFramework}
+
 \subsection{形变模型}
-\subsection{图像插值方法}
 \subsection{相似性测度}
-\subsection{最有接寻找}
+\subsection{图像插值方法}
+\subsection{最优解寻找}
 
 \section{图谱选择方法}
 metadata\par
