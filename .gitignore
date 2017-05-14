@@ -1,6 +1,5 @@
 # data
 *.nii.gz
-*.png
 *.swp
 
 **/output

@@ -3,13 +3,58 @@
 \chapter{多图谱分割方法}
 
 \section{图像配准方法}
+  图像配准(image registration)是多图谱分割方法的重中之重，
+  图像配准的好坏对最终的分割结果有着直接的影响。
 \subsection{图像配准概述}
-图像配准(image registration)是医学图像处理分析领域的一个基本问题，
-是一个在不同图像之间建立空间上的联系的过程\citeup{MultiAtlasSurvey}。
+在医学图像的采集过程中，由于成像原理（MRI, CT, PET, 超声等）、设备、参数的不同，
+或者患者同一部位不同时间的形态变化，甚至不同被试者同一部位的结构差别，
+会导致成像结果的差异。
+而在实际中，将不同的医学图像进行观察，是比较常见的。例如：
+\begin{enumerate}
+  \item 在数字剪影血管造影(DSA)中，需要将注射造影剂之前和之后的图像进行相减。
+  \item 将患者某一部位的影像和标准影像进行对比。
+  \item 将功能成像（例如正电子发射成像，PET）%
+    和解剖成像（例如磁共振图像，MRI）综合观察。
+\end{enumerate}
+如果我们想要综合不同图像进行观察，首先要做的就是将图像``对齐''，
+这种所谓的对齐，便是图像配准。
+
+总的来说，配准，是一个在不同图像之间建立空间上的联系的过程\citeup{MultiAtlasSurvey}，
+图\ref{RegistrationIsMapping}形象阐释了这一概念。
+\pic[h]{配准是在图像之间建立空间变换\citeup{itkbook2}}{width=0.6\textwidth}{RegistrationIsMapping}
+
+图像配准是医学图像处理分析的重要一环，
+同时也是该领域的一个热门研究方向。
+此外，除了医学图像处理方向，在其它图像处理领域，图像配准也有广泛的应用。
+
+根据文献\cite{RegistrationSurvey,RegistrationSurveyNew}，
+配准的分类标准大概有以下几项：
+\begin{enumerate}
+  \item 图像维度：二维图像配准，三维图像配准等。
+  \item 配准特征：
+    分为外部特征（例如螺丝钉标或者皮肤上画的标记），
+    内部特征（例如图像灰度）和
+    非图像特征（例如坐标系统）。
+  \item 图像形变：分为刚性变换，放射变换，投射变换和曲线变换。
+  \item 变换域：分为局部变换和全局变换。
+    图\ref{2DTransformation}对变换域和图像形变有形象的展示。
+  \item 交互性：分为手动，半自动，全自动配准。
+  \item 优化过程：
+\end{enumerate}
+
+\pic[h]{二维配准的一个例子\citeup{RegistrationSurvey}}{width=0.6\textwidth}{2DTransformation}
+
+在这篇文章中，我们主要关注的是全自动的心脏单模态图像配准。
+
+图像配准的计算机全自动实现方法，实际上是一个不断迭代的优化过程。
+一个典型的配准框架如图\ref{RegistrationFramework}所示
+\pic[h]{一个典型的配准框架\citeup{itkbook2}}{width=\textwidth}{RegistrationFramework}
 
 landmark\par
-\subsection{图像变换}
+\subsection{形变模型}
 \subsection{图像插值方法}
+\subsection{相似性测度}
+\subsection{最有接寻找}
 
 \section{图谱选择方法}
 metadata\par
