@@ -27,6 +27,7 @@
 同时也是该领域的一个热门研究方向。
 此外，除了医学图像处理方向，在其它图像处理领域，图像配准也有广泛的应用。
 
+\subsection{配准分类}
 根据文献\cite{RegistrationSurvey,RegistrationSurveyNew}，
 配准的分类标准大概有以下几项：
 \begin{enumerate}
@@ -39,16 +40,21 @@
   \item 变换域：分为局部变换和全局变换。
     图\ref{2DTransformation}对变换域和图像形变有形象的展示。
   \item 交互性：分为手动，半自动，全自动配准。
-  \item 优化过程：
+  \item 优化过程：分为直接计算变换参数和搜寻最优参数。
+  \item 模态(modality)：分为多模态，单模态，对模型配准和对患者配准。
+  \item 主体(subject)：同一患者的图像(intrasubject)，
+    不同患者的图像(intersubject)，患者图像与图谱(atlas)
+  \item 对象(object)：包括头胸腹肢体等等。
 \end{enumerate}
+\pic[h]{二维配准的一个例子\citeup{RegistrationSurvey}}{width=0.7\textwidth}{2DTransformation}
 
-\pic[h]{二维配准的一个例子\citeup{RegistrationSurvey}}{width=0.6\textwidth}{2DTransformation}
+在这篇文章中，我们主要关注的是全自动的心脏单模态图像非刚性配准。
 
-在这篇文章中，我们主要关注的是全自动的心脏单模态图像配准。
-
+\subsection{配准框架}
 图像配准的计算机全自动实现方法，实际上是一个不断迭代的优化过程。
+
 一个典型的配准框架如图\ref{RegistrationFramework}所示
-\pic[h]{一个典型的配准框架\citeup{itkbook2}}{width=\textwidth}{RegistrationFramework}
+\pic[h]{一个典型的配准框架\citeup{itkbook2}}{width=0.8\textwidth}{RegistrationFramework}
 
 landmark\par
 \subsection{形变模型}
