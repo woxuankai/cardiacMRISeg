@@ -5,6 +5,7 @@
 \section{图像配准方法}
   图像配准(image registration)是多图谱分割方法的重中之重，
   图像配准的好坏对最终的分割结果有着直接的影响。
+
 \subsection{图像配准概述}
 在医学图像的采集过程中，由于成像原理（MRI, CT, PET, 超声等）、设备、参数的不同，
 或者患者同一部位不同时间的形态变化，甚至不同被试者同一部位的结构差别，
@@ -28,11 +29,39 @@
 图\ref{RegistrationIsMapping}形象阐释了这一概念。
 \pic[ht]{配准是在图像之间建立空间变换\citeup{itkbook2}}{width=0.6\textwidth}{RegistrationIsMapping}
 
+
+
+考虑在两幅图像间配准的情况，
+通常一幅图像被称为原图像(source image)或者固定图像(fixed image)，
+另一幅图像被称为目标图像(target image)或者浮动图像(moving image)。
+用$S$表示固定图像，$T$指代浮动图像，
+两幅定义域为$\Omega$的图像通过变换$W$相关联。
+配准的目的就是估计出一个最佳的的变换$W$来优化以下这个形式的能量函数
+\citeup{DeformableRegistrationSurvey}。
+\begin{equation}\label{LossFunction}
+\mathcal{M}(T,S\circ W)+\mathcal{R}(W)
+\end{equation}
+函数由两部分组成，
+第一部分刻画了T和用W变换后的S的``对齐''程度，
+在这个优化问题中，
+需要最大化还是最小化这个能量函数取决于$\mathcal{M}$的定义。
+式子的后一项$\mathcal{R}(W)$，
+引入了对变换$W$的一个偏好，可以用于存在对图像变换有一定先验知识的情况。
+
+于是，根据\ref{LossFunction}，配准问题转化成为了以下问题
+\begin{equation}\label{OptimizationFunction}
+  W^\ast=\underset{W}{arg} \ max \ \mathcal{M}(T,S\circ W)+\mathcal{R}(W)
+\end{equation}
+此处我们假设图像越相似，$\mathcal{M}$越大；
+如果图像越相似$\mathcal{M}$越小，
+应将式\ref{OptimizationFunction}中$max$变为$min$。
+
+
 图像配准是医学图像处理分析的重要一环，
 是该领域的一个热门研究方向。
 此外，除了医学图像处理方向，在其它图像处理领域，图像配准也有广泛的应用。
 
-\subsection{配准分类}
+\subsection{配准分类}\label{RegistrationClassification}
 \pic[ht]{二维配准的一个例子\citeup{RegistrationSurvey}}{width=0.7\textwidth}{2DTransformation}
 根据文献\cite{RegistrationSurvey,RegistrationSurveyNew}，
 配准的分类标准有以下几项：
@@ -41,61 +70,60 @@
   \item 配准特征：
     分为外部特征（例如螺丝钉标或者皮肤上画的标记），
     内部特征（例如图像灰度）和
-    非图像特征（例如坐标系统）。
-  \item 图像形变：分为刚性变换，放射变换，投射变换和曲线变换。
+    非图像特征（例如坐标系统），在\ref{SectionMetric}有更为详细的介绍。
+  \item 图像形变模型：图像形变模型是在式子\ref{LossFunction}中将$S$变形，
+    使其和$T$相似的变换$W$的数学模型。
+    图像形变模型一般分为刚性变换，仿射变换，投影变换和曲线变换，
+    在\ref{SectionTransformation}中有更详细的介绍。
   \item 变换域：分为局部变换和全局变换。
-    图\ref{2DTransformation}对变换域和图像形变有形象的展示。
+    图\ref{2DTransformation}对变换域和图像形变模型有形象的展示。
   \item 交互性：分为交互式，半自动，全自动配准。
-  \item 优化过程：分为直接计算变换参数和搜寻最优参数。
-  \item 模态(modality)：分为多模态，单模态，对模型配准和对患者配准。
-  \item 主体(subject)：同一患者的图像(intrasubject)，
-    不同患者的图像(intersubject)，患者图像与图谱(atlas)
-  \item 对象(object)：包括头胸腹肢体等等。
+  \item 优化过程：分为直接计算变换参数和搜寻最优参数，
+    在\ref{SectionOptimization}中有更详细的介绍。
+  \item 模态(modality)：一般指的图像采集方式，
+    分为多模态（例如CT图像与MRI图像配准），
+    单模态（例如CT图像和CT图像配准），对模型配准和对患者配准。
+  \item 主体(subject)：分为同一患者的图像相互配准(intrasubject)，
+    不同患者的图像之间配准(intersubject)，患者图像与图谱(atlas)。
+  \item 对象(object)：被配准的图像中的扫描对象，包括头胸腹肢体等等。
 \end{enumerate}
 
 在这篇文章中，我们主要关注的是全自动的单模态心脏图像非刚性配准。
 
-\subsection{配准框架}
-考虑在两幅图像间配准的情况，
-通常一幅图像被称为原图像(source image)或者固定图像(fixed image)，
-另一幅图像被称为目标图像(target image)或者浮动图像(moving image)。
-用$S$表示固定图像，$T$指代浮动图像，
-两幅定义域为$\Omega$的图像通过变换$W$相关联。
-配准的目的就是估计出一个最佳的的变换$W$来优化以下这个形式的能量函数
-\citeup{DeformableRegistrationSurvey}。
-$$\mathcal{M}(T,S\circ W)+\mathcal{R}(W)$$
-函数由两部分组成，
-第一部分刻画了T和用W变换后的S的``对齐''程度，
-这就带来了一个优化问题，最大化还是最小化取决于$\mathcal{M}$的定义。
-如果有对变换的先验知识，式子的后一项$\mathcal{R}(W)$，
-引入了对变换$W$的一个偏好。
+\subsection{形变模型}\label{SectionTransformation}
+在式\ref{OptimizationFunction}中，
+图像变换$W$和浮动图像$S$、固定图像$T$一起，构成一个配准方法的三大要素。
 
-%一个典型的图像配准算法，一般由一下几个部分组成：
-%\begin{enumerate}
-%  \item 浮动图像(floating image)：被配准的图像。
-%  \item 固定图像(fixed image)：被形变的图像，配准的目的是尽量
-%\end{enumerate}
-%Image registration involves deforming
-%(or warping) one or more images to maximize an objective function
-%that combines a metric of spatial alignment with a regularizer that
-%quantifies the plausibility of the deformation.
+The optimal choice of algorithm specifics largely depends on the
+biomedical application, its goal (Yeo et al., 2010), and operational con-
+straints, such as available computational resources, desired accuracy,
+and restrictions on time. Once registration is complete, the resulting
+spatial transform can then be used to map from the frame of one im-
+age to the coordinates of another.
+形变模型的选择决定了图像变换的自由度
+\subsubsection{刚性变换}
+\subsubsection{仿射变换}
+\subsubsection{非刚性变换}
 
-于是，配准问题转化成为了以下问题
-$$W^\ast=arg \ max \ \mathcal{M}(T,S\circ W)+\mathcal{R}(W)$$
-此处我们假设图像越相似，$\mathcal{M}$越大。
+\subsection{相似性测度}\label{SectionMetric}
 
-对于这样一个优化问题，一般很难直接求解$W$，
+
+\subsection{最优解寻找}\label{SectionOptimization}
+最优解的寻找对于一个配准问题来说是至关重要的，
+因为如果没有办法求解形变模型的参数，
+使用再复杂的形变模型、挑选再适合的相似度测定方法，都是徒劳。
+没有办法求解参数，就
+在\ref{SectionClassification}所展示的分类中，最优解寻找方法分为直接
+对于式\ref{OptimizationFunction}这样一个优化问题，一般很难直接求解$W$，
 只能通过一个不断迭代的过程来优化。
 
 一个典型的配准框架如图\ref{RegistrationFramework}所示。
 \pic[ht]{一个典型的配准框架\citeup{itkbook2}}{width=0.8\textwidth}{RegistrationFramework}
 
-\subsection{形变模型}
-\subsection{相似性测度}
-\subsection{图像插值方法}
-\subsection{最优解寻找}
+\subsection{插值方法}\label{SectionModality}
 
 \section{图谱选择方法}
+
 metadata\par
 
 \section{图像融合方法}
