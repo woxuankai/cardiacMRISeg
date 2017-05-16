@@ -29,8 +29,6 @@
 图\ref{RegistrationIsMapping}形象阐释了这一概念。
 \pic[ht]{配准是在图像之间建立空间变换\citeup{itkbook2}}{width=0.6\textwidth}{RegistrationIsMapping}
 
-
-
 考虑在两幅图像间配准的情况，
 通常一幅图像被称为原图像(source image)或者固定图像(fixed image)，
 另一幅图像被称为目标图像(target image)或者浮动图像(moving image)。
@@ -46,7 +44,9 @@
 在这个优化问题中，
 需要最大化还是最小化这个能量函数取决于$\mathcal{M}$的定义。
 式子的后一项$\mathcal{R}(W)$，
-引入了对变换$W$的一个偏好，可以用于存在对图像变换有一定先验知识的情况。
+引入了对变换$W$的一个偏好项或者是一个规范项，
+可以用于存在对图像变换有一定先验知识的情况，
+或者对图像变换的范围有一定规定的情况。
 
 于是，根据\ref{LossFunction}，配准问题转化成为了以下问题
 \begin{equation}\label{OptimizationFunction}
@@ -57,7 +57,7 @@
 应将式\ref{OptimizationFunction}中$max$变为$min$。
 
 
-图像配准是医学图像处理分析的重要一环，
+图像配准是医学图像处理分析的基本问题之一，
 是该领域的一个热门研究方向。
 此外，除了医学图像处理方向，在其它图像处理领域，图像配准也有广泛的应用。
 
@@ -100,7 +100,7 @@ straints, such as available computational resources, desired accuracy,
 and restrictions on time. Once registration is complete, the resulting
 spatial transform can then be used to map from the frame of one im-
 age to the coordinates of another.
-形变模型的选择决定了图像变换的自由度
+形变模型的选择决定了最终配准效果的上限。
 \subsubsection{刚性变换}
 \subsubsection{仿射变换}
 \subsubsection{非刚性变换}
