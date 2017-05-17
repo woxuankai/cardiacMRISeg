@@ -15,19 +15,27 @@
 在过去的二十年中，因心血管疾病导致的死亡人数在高收入国家减少，
 但在中低收入国家以惊人的速度增加。\citeup{WHOCardiovascularDisease2011}
 
-对于左心室的非入侵(non-invasive)式的评价
+对于左心室的非入侵式(non-invasive)的评价
 是对于心血管疾病的诊断与病症掌握的重要部分。
-电影式磁共振成像(Cine MRI)已经被证明是一种能定量估计左心室功能的、
+电影式磁共振成像(cine MRI)已经被证明是一种能定量估计左心室功能的、
 准确并且可重现的形态。
 相关的估计包括了心室体积，质量和腔体射血分数(ejection fraction, EF)，
 这些估计都是基于对心内膜(endocardium)与心外膜(epicardium)界限的分割技术的结果。
 \citeup{LevelSetMICCAI2013}
 
-快速发展的影像技术带来了海量的影像，给
-However, LV segmentation is still a open problem and is challenging due to poor
-contrast between tissues around the epicardium and intensity inhomogeneities
-in cine CMR images.\citeup{LevelSetMICCAI2013}
+快速发展的影像技术带来了海量的影像，也给影像科医生带来了巨大的工作量。
+对于电影式磁共振成像得到的的四维（三维$+$时间)图像的全手动分割是不现实的，
+因为这将浪费一名经验丰富的医师大概两个小时来分割一个典型的有150个切片的数据集。
+因此，一般只将完整数据集中的舒张末期和收缩末期的图像进行手动分割。
+如果想利用所有得到的心脏磁共振图像来进行量化分析，我们需要全自动的分割方法。
+除此之外，手动分割还有一个问题，分割结果是受主观影响的：
+同一名医师的不同次分割结果、不同医师的分割结果，都存在差异。
+自动化的分割让不同时间、不同地点的分割结果更容易比较，
+因为自动话的分割结果是完全定义好的、确定性的过程。
+最后，对于一些比较好的方法，无论扫描的方向如何，自动化的分割结果都是一致的，
+这对于手动分割来说，是个非常乏味的过程。\citeup{KedenburgAutomatic2006}
 
+\section{难点??????}
 \section{国内外研究现状}
 
 
@@ -101,6 +109,25 @@ Challenge Workshop on Segmentation:Algorithms,Theory and Applications”的比�
 与 2009年的比赛不同,此次比赛评价整个心跳周期内左心室的分割结果。参赛的9种分
 割方法按是否需要配准算法支持被分为两类。
 
+
+However, LV segmentation is still a open problem and is challenging due to poor
+contrast between tissues around the epicardium and intensity inhomogeneities
+in cine CMR images.\citeup{LevelSetMICCAI2013}
+
 \section{本文研究内容与创新点}
+本文将多谱图分割方法
+
 
 \section{本文组织结构}
+本文共四章。
+
+第一章介绍了问题的提出与该课题的意义。
+
+第二章首先概述了传统的分割方法，
+然后从配准、图谱选择、标签融合等方面着重介绍了多图谱分割方法
+并简述了分割结果的评价方法。
+
+第三章从多方面描述了本人所做的工作，并对结果做了评价与分析。
+
+最后一章对本文提出的方法做了归纳，并总结了该方法的意义、改进方向与展望。
+
