@@ -2,6 +2,8 @@
 
 \chapter{多图谱分割方法}
 
+\section{常见医学图像分割方法}
+
 \section{图像配准方法}
   图像配准(image registration)是多图谱分割方法的重中之重，
   图像配准的好坏对最终的分割结果有着直接的影响。
@@ -43,8 +45,8 @@
 第一部分刻画了T和用W变换后的S的``对齐''程度，
 在这个优化问题中，
 需要最大化还是最小化这个能量函数取决于$\mathcal{M}$的定义。
-式子的后一项$\mathcal{R}(W)$，
-引入了对变换$W$的一个偏好项或者是一个规范项，
+式子的后一项$\mathcal{R}(W)$被称为正则项(regularization)，
+引入了对变换$W$的一个偏好项，
 可以用于存在对图像变换有一定先验知识的情况，
 或者对图像变换的范围有一定规定的情况。
 
@@ -90,29 +92,34 @@
 
 在这篇文章中，我们主要关注的是全自动的单模态心脏图像非刚性配准。
 
-\subsection{形变模型}\label{SectionTransformation}
-在式\ref{OptimizationFunction}中，
-图像变换$W$和浮动图像$S$、固定图像$T$一起，构成一个配准方法的三大要素。
 
+\subsection{相似性测度}\label{SectionMetric}
+
+\subsection{形变模型}\label{SectionTransformation}
+形变模型(deformation model)和
+目标函数(objective function, loss function，即式\ref{OptimizationFunction})
+与优化器(optimizer)一起，构成一个配准方法的三大要素\citeup{MultiAtlasSurvey}。
+
+Iglesias2015, 2.3 Registration
 The optimal choice of algorithm specifics largely depends on the
 biomedical application, its goal (Yeo et al., 2010), and operational con-
 straints, such as available computational resources, desired accuracy,
 and restrictions on time. Once registration is complete, the resulting
 spatial transform can then be used to map from the frame of one im-
 age to the coordinates of another.
-形变模型的选择决定了最终配准效果的上限。
+形变模型的选择决定了最终配准效果的上限，
+所以，根据具体问题选择合适的形变模型，对与一个配准方法来说是非常重要的。
 \subsubsection{刚性变换}
 \subsubsection{仿射变换}
 \subsubsection{非刚性变换}
 
-\subsection{相似性测度}\label{SectionMetric}
 
 
 \subsection{最优解寻找}\label{SectionOptimization}
 最优解的寻找对于一个配准问题来说是至关重要的，
 因为如果没有办法求解形变模型的参数，
 使用再复杂的形变模型、挑选再适合的相似度测定方法，都是徒劳。
-没有办法求解参数，就
+
 在\ref{SectionClassification}所展示的分类中，最优解寻找方法分为直接
 对于式\ref{OptimizationFunction}这样一个优化问题，一般很难直接求解$W$，
 只能通过一个不断迭代的过程来优化。
@@ -124,12 +131,23 @@ age to the coordinates of another.
 
 \section{图谱选择方法}
 
-metadata\par
+\subsection{相似度}
+\subsection{元数据(metadata)}
+
+\section{标签传播}
+在完成图像配准之后，我们将得到一个
 
 \section{图像融合方法}
+在完成图谱选择并进行标签传播之后，我们将得到多个分割结果；
+为了得到最终的分割结果，我们需要将多个结果融合起来。
+
+\subsection{多数投票法}
+多数投票法(majority voting)是一种简单但不失有效的方法。
+加权多数投票法(weighted voting)
+
 \subsection{STAPLE}
+
 \subsection{Jonit Label Fusion}
-\subsection{Majority Vote}
 
 \section{分割结果评价}
 
@@ -146,7 +164,7 @@ metadata\par
 如图\ref{picd}所示给出了时间步长选取为0.5ns 时采用三种不同存储方式计算的
 平板中心处$x$方向的感应电流值与IDFT 方法计算结果的比较，……。如图\ref{pice}
 所示给出了存储方式为基权函数压缩存储方式，时间步长分别取0.4ns、0.5ns、0.6ns
-时平板中心处$x$方向的感应电流计算结果，从图中可以看出不同时间步长的计算结果基本相同。
+时平板中心处$x$方向的感应电流计算结果，从图中可以看出不同时间步长的计算结果基本相同。\ref{picde}
 
 \begin{pics}[h]{$2m*2m$的理想导体平板中心处感应电流$x$分量随时间的变化关系}{picde}
 \addsubpic{不同存储方式的计算结果与IDFT方法的结果比较}{keepaspectratio,height=5.58cm,width=6.77cm}{picd}
