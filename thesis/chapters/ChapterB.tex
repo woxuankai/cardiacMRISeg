@@ -29,7 +29,8 @@
 
 总的来说，配准，是一个在不同图像之间建立空间上的联系的过程\citeup{MultiAtlasSurvey}，
 图\ref{RegistrationIsMapping}形象阐释了这一概念。
-\pic[ht]{配准是在图像之间建立空间变换\citeup{itkbook2}}{width=0.6\textwidth}{RegistrationIsMapping}
+\pic[ht]{配准是在图像之间建立空间变换\citeup{ITKBookDevelop}}%
+{width=0.6\textwidth}{RegistrationIsMapping}
 
 考虑在两幅图像间配准的情况，
 通常一幅图像被称为原图像(source image)或者固定图像(fixed image)，
@@ -120,12 +121,13 @@ age to the coordinates of another.
 因为如果没有办法求解形变模型的参数，
 使用再复杂的形变模型、挑选再适合的相似度测定方法，都是徒劳。
 
-在\ref{SectionClassification}所展示的分类中，最优解寻找方法分为直接
+在\ref{RegistrationClassification}所展示的分类中，最优解寻找方法分为直接
 对于式\ref{OptimizationFunction}这样一个优化问题，一般很难直接求解$W$，
 只能通过一个不断迭代的过程来优化。
 
 一个典型的配准框架如图\ref{RegistrationFramework}所示。
-\pic[ht]{一个典型的配准框架\citeup{itkbook2}}{width=0.8\textwidth}{RegistrationFramework}
+\pic[ht]{一个典型的配准框架\citeup{ITKBookDevelop}}%
+{width=0.8\textwidth}{RegistrationFramework}
 
 \subsection{插值方法}\label{SectionModality}
 
@@ -154,40 +156,3 @@ age to the coordinates of another.
 \section{多图谱方法的未来发展}
 
 \section{本章小结}
-
-
-\subsection{数值算例与分析}
-……。如表\ref{tablea}所示给出了时间步长分别取0.4ns、0.5ns、0.6ns 时的三种存储
-方式的存储量大小。……。
-\pictable[h]{计算$2m*2m$理想导体平板时域感应电流采用的三种存储方式的存储量比较}{}{tablea}
-
-如图\ref{picd}所示给出了时间步长选取为0.5ns 时采用三种不同存储方式计算的
-平板中心处$x$方向的感应电流值与IDFT 方法计算结果的比较，……。如图\ref{pice}
-所示给出了存储方式为基权函数压缩存储方式，时间步长分别取0.4ns、0.5ns、0.6ns
-时平板中心处$x$方向的感应电流计算结果，从图中可以看出不同时间步长的计算结果基本相同。\ref{picde}
-
-\begin{pics}[h]{$2m*2m$的理想导体平板中心处感应电流$x$分量随时间的变化关系}{picde}
-\addsubpic{不同存储方式的计算结果与IDFT方法的结果比较}{keepaspectratio,height=5.58cm,width=6.77cm}{picd}
-\addsubpic{不同时间步长的计算结果比较}{keepaspectratio=false,height=5.48cm,width=7.04cm}{pice}
-\end{pics}
-%
-由于时域混合场积分方程是时域电场积分方程与时域磁场积分方程的线性组
-合，因此时域混合场积分方程时间步进算法的阻抗矩阵特征与时域电场积分方程
-时间步进算法的阻抗矩阵特征相同。
-\section{时域积分方程时间步进算法矩阵方程的求解}
-……
-
-\begin{dingli}
-如果时域混合场积分方程是时域电场积分方程与时域磁场积分方程
-的线性组合……
-\end{dingli}
-\begin{zhengming}
-首先，由于……
-
-……\\
-根据……，结论得证。
-\end{zhengming}
-\section{本章小结}
-本章首先研究了时域积分方程时间步进算法的阻抗元素精确计算技术，分别
-采用DUFFY 变换法与卷积积分精度计算法计算时域阻抗元素，通过算例验证了计
-算方法的高精度。……

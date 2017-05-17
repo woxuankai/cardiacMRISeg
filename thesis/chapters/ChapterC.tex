@@ -2,10 +2,20 @@
 
 \chapter{多图谱方法分割心脏}
 
+这篇文章中提到的配准方法，由基于
+
 \section{图像配准}
 
+我们使用了ANTs\citeup{ANTsRegistration,ANTsBspline}和
+ITK\citeup{ITKBookDevelop,ITKBookDesign,InsightToolKit}工具进行配准，
+并使用了GNU Parallel\citeup{GNUParallel}工具加速。
+
 \section{图谱选择}
+
 metadata\par
+\footnote{在图的绘制中使用了
+SciPy\citeup{SciPy,ScientificComputingPython1,ScientificComputingPython2}
+套件里的Matplotlib\citeup{Matplotlib}和NumPy\citeup{NumPy}工具。}
 
 \section{图谱融合}
 
