@@ -22,9 +22,30 @@
 相关的估计包括了心室体积，质量和腔体射血分数(ejection fraction, EF)，
 这些估计都是基于对心内膜(endocardium)与心外膜(epicardium)界限的分割技术的结果。
 \citeup{LevelSetMICCAI2013}
+%图\ref{CineMRIPresentation}\ref{S1}展示了一次电影式磁共振成像结果的部分结果，
+%图\ref{ManualSegOfCineMRI}展示了扫描结果在舒张末期的三维图像的手工分割结果
+%\footnote{完整的扫描结果是以三维空间$+$时间（3D$+$T）的形式保存的}
+%\footnote{图片来源：MICCAI Challenge Workshop on Segmentation: %
+%Algorithms, Theory and Applications ("SATA")}
+%\pic[hb]{舒张末期专家分割结果}{width=0.5\textwidth}{ManualSegOfCineMRI}
+
+%\begin{pics}[h]{电影式磁共振扫描结果（部分）\newline}{CineMRIPresentation}
+%  \addsubpic{t0-z0}{width=0.14\textwidth}{S1}
+%  \addsubpic{t0-z2}{width=0.14\textwidth}{S2}
+%  \addsubpic{t0-z4}{width=0.14\textwidth}{S3}
+%  \addsubpic{t0-z6}{width=0.14\textwidth}{S4}
+%  \addsubpic{t0-z8}{width=0.14\textwidth}{S5}
+%  \addsubpic{t0-z10}{width=0.14\textwidth}{S6}\newline
+%  \addsubpic{t0-z8}{width=0.14\textwidth}{V1}
+%  \addsubpic{t3-z8}{width=0.14\textwidth}{V2}
+%  \addsubpic{t6-z8}{width=0.14\textwidth}{V3}
+%  \addsubpic{t9-z8}{width=0.14\textwidth}{V4}
+%  \addsubpic{t12-z8}{width=0.14\textwidth}{V5}
+%  \addsubpic{t15-z8}{width=0.14\textwidth}{V6}
+%\end{pics}
 
 快速发展的影像技术带来了海量的影像，也给影像科医生带来了巨大的工作量。
-对于电影式磁共振成像得到的的四维（三维$+$时间)图像的全手动分割是不现实的，
+对于电影式磁共振成像得到的的四维影像（三维空间$+$时间)的全手动分割是不现实的，
 因为这将浪费一名经验丰富的医师大概两个小时来分割一个典型的有150个切片的数据集。
 因此，一般只将完整数据集中的舒张末期和收缩末期的图像进行手动分割。
 如果想利用所有得到的心脏磁共振图像来进行量化分析，我们需要全自动的分割方法。
@@ -35,54 +56,59 @@
 最后，对于一些比较好的方法，无论扫描的方向如何，自动化的分割结果都是一致的，
 这对于手动分割来说，是个非常乏味的过程。\citeup{KedenburgAutomatic2006}
 
-\section{难点??????}
+
+\section{多图谱分割方法简介}
+多图谱分割方法(Multi-atlas segmentation, MAS)是由Ro, first introduced and popularized by the pioneering work of Rohlfing, et al.
+(2004), Klein, et al. (2005), and Heckemann, et al. (2006), is becoming one of the most widely-used and
+successful image segmentation techniques in biomedical applications. By manipulating and utilizing the en-
+tire dataset of “atlases” (training images that have been previously labeled, e.g., manually by an expert),
+rather than some model-based average representation, MAS has the flexibility to better capture anatomi-
+cal variation, thus offering superior segmentation accuracy. This benefit, however, typically comes at a high
+computational cost. Recent advancements in computer hardware and image processing software have been
+instrumental in addressing this challenge and facilitated the wide adoption of MAS. Today, MAS has come a
+long way and the approach includes a wide array of sophisticated algorithms that employ ideas from machine
+learning, probabilistic modeling, optimization, and computer vision, among other fields. This paper presents
+a survey of published MAS algorithms and studies that have applied these methods to various biomedical
+problems. In writing this survey, we have three distinct aims. Our primary goal is to document how MAS was
+originally conceived, later evolved, and now relates to alternative methods. Second, this paper is intended to
+be a detailed reference of past research activity in MAS, which now spans over a decade (2003–2014) and en-
+tails novel methodological developments and application-specific solutions. Finally, our goal is to also present
+a perspective on the future of MAS, which, we believe, will be one of the dominant approaches in biomedical
+image segmentation.\citeup{MultiAtlasSurvy}
+
+
+
 \section{国内外研究现状}
 
+尽管非常重要，右心室的全自动分割仍然是一个尚未解决的并且具有挑战性的问题。
+\citeup{LevelSetMICCAI2013}
+一方面，在电影式磁共振成像中，由于对成像时间有要求，心脏长轴方向分辨率较低，
+成像结果的灰度严重不均，心脏的运动也对成像结果有一定干扰；
+另一方面，心脏的结构复杂且心内膜周围的组织对比度并不高，难以区分，
+而且心脏在一个心动周期内的形变非常大。
+这些因素导致许多方法很难达到好的效果。
 
+为了解决这一问题，研究人员提出了许多方法，包括
 
-通过连续观察一系列心脏影像,结合临床诊断经验由医生给出诊断报告的诊断模
-式,使得诊断结果高度依赖于医生的主观经验,给心血管疾病的诊断带来很多不确定
-性。特别地,时间分辨率和空间分辨率大幅提高的影像设备在增加影像精度的同时也
-增加了临床医生的阅片负担。因此,借助计算机辅助诊断技术,处理分析心脏影像进
-而诊断心血管疾病成为目前国内外研究热点【58】。然而,医学成像设备采集到的心脏影
-像往往存在灰度不一致性和噪声。为了提高影像处理分析算法的精度,需要对心脏影
-像进行偏移场校正和影像噪声消除处理。现有的偏移场校正算法可以归类为前处理方
-法和后处理方法。前处理方法的典型代表包括采用放置灰度分布信息己知的物体模型、
-多线圈采样、采用特殊的脉冲序列等来降低外界环境对影像灰度影响的成像方法[59-61】。
-文献f621指出,后处理的偏移场校正方法主要包括:基于低通滤波模型的方法、超曲面
-模型方法、统计模型方法、灰度信息模型方法、基于分割的方法。传统噪声消除方法
-通常基于噪声是振荡的,正常组织的灰度是平滑的或分段平滑的假设,将组织微小细
-节和噪声等同对待,消除影像噪声的同时也会扭曲影像中的结构信息,给医学影像数
-据带来新伪影【631。近些年提出的Non.Local去噪方法有效消除影像噪声的同时,不会
-扭曲心脏影像,已经成为当前研究热点【631。经过偏移场校正和噪声消除等影像预处理
-后的心脏影像影像有助于提高影像处理分析方法的精度。影像分割是影像处理分析关
-键技术之一【641。通常地,分割方法通过影像灰度、形状模型、配准或分类的方法从医
-学影像中提取感兴趣区域。由分割结果可以计算并获取心脏全局参数和各种运动参数
-以辅助医生进行心血管疾病的早期诊断。心脏可视化是影像处理分析另一关键技术【65】。
-该技术可以定性和/或定量建立心脏三维、四维模型,并通过不同的绘制技术将实时跳
-动的心脏和分割到的组织器官以不同的颜色渲染出来,且可以显示心脏功能参数信息。
+医学图像处理领域的顶级会议，医学图像计算与计算机辅助干预协会
+(The Medical Image Computing and Computer Assisted Intervention Society,
+The MICCAI Sociery)分别在2009和2013年组织了名为
+``Cardiac MR Left Ventricle Segmentation Challenge''和
+``MICCAI Challenge Workshop on Segmentation:
+Algorithms, Theory and Applications ("SATA")''的比赛。
 
-
-由左心室分割算法定位出心室内膜和外膜后的分割结果可以估计心室体积、心肌
-质量和射血比例等左心室功能参数。但是受心室外膜附近糟糕对比度和整个心脏影像
-灰度不均匀性的影响,左心室分割仍然是一个开放性的具有挑战的问题【661。手动分割
-是最显而易见的左心室分割方法【6‘n。但是,由经过特殊训练的内科医生或技术人员手
-动勾勒出左心室分割曲线是一项耗时且乏味的工作。另外,手动分割往往在勾画者内
-和勾画者间存在差异。也就是说,勾画者有自己的喜好和倾向。同时,同一勾画者在
-不时间对同一影像描绘的分割曲线也不完全相同。除此之外,手动分割一层一层地描
-绘左心室内外膜曲线,并没有考虑到心室的空间结构信息。为了克服手动分割的缺点,
-领域内研究人员提出了许多自动或半自动的左心室分割方法168-76】。传统的分割技术像
+为了克服手动分割的缺点，领域内研究人员提出了许多自动或半自动的左心室分割方法168-76】。传统的分割技术像
 阈值、分类、聚类都被用于左心室分割【6引。活动形状模型(Active
- Shape Model,ASM)
- 及由其演化来的活动外观模型(Active
-  Appearance
-   Models,AAMs)已经成为杰出的左
-   心室分割方法[69-71】。但是这类方法严重依赖训练数据集的规模和类别丰富程度。基于
-   配准的左心室分割方法需要手动分割数据集做为模版,且算法分割精度受配准精度限
-   制【72】。由于可以提供光滑的封闭曲线作为分割结果且可以达到亚像素分割精度,活动
-   轮廓模型和水平集方法广泛应用于影像分割领域173-76】。文献[73】提出一种耦合的表面蔓
-   延方法来分割左心室心肌。该方法通过控制内膜曲线和外膜曲线将心肌厚度限定在给
-
+Shape Model,ASM)
+及由其演化来的活动外观模型(Active
+Appearance
+Models,AAMs)已经成为杰出的左
+心室分割方法[69-71】。
+但是这类方法严重依赖训练数据集的规模和类别丰富程度。基于
+配准的左心室分割方法需要手动分割数据集做为模版,且算法分割精度受配准精度限
+制【72】。由于可以提供光滑的封闭曲线作为分割结果且可以达到亚像素分割精度,活动
+ 轮廓模型和水平集方法广泛应用于影像分割领域173-76】。文献[73】提出一种耦合的表面蔓
+延方法来分割左心室心肌。该方法通过控制内膜曲线和外膜曲线将心肌厚度限定在给
 定区间。显然,这个限制并不符合心肌的解剖结构。Paragios和Lynch进一步改进了这
 种方法[74,75】。他们用两个不同水平集函数的零水平分别表示心室内膜和外膜。两个水
 平集函数耦合在一起演化。同样地,两个零水平集之间的距离在迭代过程中被限定在
@@ -90,29 +116,10 @@
 函数的多个水平集表达影像对象的多个边界。但是,他们并没有验证这种方法用于心
 室分割的有效性,并且该方法并没有在代表影像边界的多个水平集之间增加任何条件
 约束。以上提到的方法均不具备处理影像灰度不一致性的能力。2011年发表在Medical
-Image
- Analysis上的综述性文章[77】总结了发表于1993到201 1年之间的70篇关于左心
- 室分割的文章,并以是否需要先验知识来将左心室分割算法分为两类。医学影像处理
- 分析领域顶级会议MICCAI(Medical
-  Image Computing
-   and Computer—Assisted
-   Intervention),于2009年组织了名为“Cardiac MR
-    Left
-     Ventricle Segmentation
-     Challenge”的比赛【78】。该比赛只评价分割算法在收缩末期和舒张末期的分割结果。最
-     终出版的会议录收集了8各分割算法,但各算法的分割结果都差强人意。
-     
-2613年,该
-会议又组织了名为“MICCAI
-Challenge Workshop on Segmentation:Algorithms,Theory and Applications”的比赛,
-其中左心室分割是该workshop的一个重要组成部分【79】。
-与 2009年的比赛不同,此次比赛评价整个心跳周期内左心室的分割结果。参赛的9种分
-割方法按是否需要配准算法支持被分为两类。
+Image  Analysis上的综述性文章[77】总结了发表于1993到201 1年之间的70篇关于左心
+室分割的文章,并以是否需要先验知识来将左心室分割算法分为两类。
 
 
-However, LV segmentation is still a open problem and is challenging due to poor
-contrast between tissues around the epicardium and intensity inhomogeneities
-in cine CMR images.\citeup{LevelSetMICCAI2013}
 
 \section{本文研究内容与创新点}
 本文将多谱图分割方法
