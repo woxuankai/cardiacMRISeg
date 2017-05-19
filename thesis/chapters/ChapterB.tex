@@ -220,7 +220,14 @@ a_{11}& a_{12}\\ a_{21}& a_{22}
 其中$(x^\prime,y^\prime,k^\prime)$和$(x,y,k)^T$为二维点的齐次坐标，
 消去$\rho$可得对应的非齐次坐标公式如下：
 \begin{equation}
+  \begin{cases}
+    \bar{x}^\prime=\frac{x^\prime}{k^\prime}=
+    \frac{a_{11}x+a_{12}y+a_{13}k}{a_{31}x+a_{32}y+a_{33}k}\\
+    \bar{y}^\prime=\frac{y^\prime}{k^\prime}=
+    \frac{a_{21}x+a_{22}y+a_{23}k}{a_{31}x+a_{32}y+a_{33}k}
+  \end{cases}
 \end{equation}
+
 当$a_{31}=0$，$a_{32}=0$时，射影变换与仿射变换具有相同的形式。
 \subsubsection{非线性变换}
 非线性变换可以把直线变换为曲线。在2D空间中,可以用一下公式表示:
