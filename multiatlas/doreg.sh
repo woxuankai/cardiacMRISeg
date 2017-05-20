@@ -7,6 +7,7 @@ doreg.sh
 	-m <moving image (atlas lable)> -t <transform base path>
 	-s <warped label (target seg)> -w <warped image>
 	-d <dimensionality>
+  [-a <use affine transformation only, default 0>]
 	[-s <skip registration if possible, default 0>]
 	[-h (show help)]
 
@@ -15,8 +16,9 @@ ENDOFUSAGE
 }
 
 SKIP='0'
+AFFINEONLY='0'
 # parse arguments
-while getopts 'f:l:m:t:s:w:d:k:h' OPT
+while getopts 'f:l:m:t:s:w:d:k:ha:' OPT
 do
 	case $OPT in
 		f) # fixed image
@@ -47,6 +49,9 @@ do
 			usage
 			exit 0
 			;;
+    a) # use affine transformation only
+      AFFINEONLY="$OPTARG"
+      ;;
 		\?) # getopts error
 			usage
 			exit 1
@@ -111,15 +116,15 @@ antsRegistration \
 	--initial-moving-transform "[$FIXED,$MOVING,1]" \
   --transform 'Rigid[0.1]' \
 	--metric "MI[$FIXED,$MOVING,1,32]" \
-	--transform 'Affine[0.1]' \
 	--convergence [1000x500x250x100,1e-6,10] \
 	--shrink-factors 8x4x2x1 \
 	--smoothing-sigmas 3x2x1x0vox \
+	--transform 'Affine[0.1]' \
 	--metric "MI[$FIXED,$MOVING,1,32]" \
 	--convergence [1000x500x250x100,1e-6,10] \
 	--shrink-factors 8x4x2x1 \
 	--smoothing-sigmas 3x2x1x0vox \
-	--transform BSpline[0.1,200] \
+	--transform 'BSpline[0.1,200]' \
 	--metric "CC[$FIXED,$MOVING,1,4]" \
 	--convergence [1000x500x250x100,1e-6,10] \
 	--shrink-factors 8x4x2x1 \
