@@ -1,0 +1,33 @@
+\section{图像融合方法}
+在完成图谱选择并进行标签传播之后，我们将得到多个分割结果；
+为了得到最终的分割结果，我们需要将多个结果融合起来。
+
+\subsection{多数投票法}
+多数投票法(majority voting)是一种简单但不失有效的方法。
+多数投票法中，对于每一个部位，最终标记结果是所有分割结果中出现次数最多的标记，
+这个方法使用了所有分割结果的信息。
+然而他也有缺点，多数投票法并没有利用图像灰度信息。
+
+加权投票法(weighted voting)是多数投票法的一个扩展，每个图谱都有一个权重，
+权重与图谱和目标图像的相似度有关。
+
+加权投票法如下：
+
+\begin{equation}
+  E_{WV}=max[f_1(x),\ldots,f_i(x)], i=1,2,3,\ldots,L
+\end{equation}
+\begin{equation}
+  f_i(x)=\sum_{k=1}^{K=1}w_{k,i}(x), i=1,2,3,\ldots,L
+\end{equation}
+\begin{equation}
+  w_{k,i}(x)=
+  \begin{cases}
+    1 & i=e_k(x)\\
+    0 & i\ne e_k(x)
+  \end{cases}
+\end{equation}
+式子中，
+
+\subsection{STAPLE}
+
+\subsection{Jonit Label Fusion}

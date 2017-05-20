@@ -1,0 +1,133 @@
+\subsection{形变模型}\label{SectionTransformation}
+形变模型(deformation model)和
+目标函数(objective function, loss function，即式\ref{OptimizationFunction})
+与优化器(optimizer)一起，构成一个配准方法的三大要素\citeup{MultiAtlasSurvey}。
+
+Iglesias2015, 2.3 Registration
+The optimal choice of algorithm specifics largely depends on the
+biomedical application, its goal (Yeo et al., 2010), and operational con
+straints, such as available computational resources, desired accuracy,
+and restrictions on time. Once registration is complete, the resulting
+spatial transform can then be used to map from the frame of one im
+age to the coordinates of another.
+形变模型的选择决定了最终配准效果的上限，
+所以，根据具体问题选择合适的形变模型，对与一个配准方法来说是非常重要的。
+
+%copy 多模态医学图像配准研究
+各种图像配准技术都需要建立自己的变换模型，变换空间的选取与图像的
+变形特性有关，图像的几何变换可分为全局、局部两类，全局变换对整幅图像
+都有效，通常涉及矩阵代数，典型的变换运算有平移、旋转和缩放;局部变换
+有时又称为弹性变换它允许变换参数存在对空间的依赖性。对于局部变换，由
+于局部变换随图像像素位置变化而变化，变换规则不完全一致，需要进行分段
+小区域处理。空间变换描述了一幅图像中的位置映射到另一幅图像中的相应位
+置之间的关系。经常用到的图像变换主要有刚体变换、仿射变换、射影变换和
+非线性变换。下面分别对这四种变换进行数学描述：
+
+\subsubsection{刚体变换}
+如果用以配准的图像包含相同的内容，只是位置有所不同，那么就可以用
+旋转和平移来描述配准变换---这就是刚性变换。在二维情况下，刚性变换包
+含三个自由度，他们分别是：沿着两个个坐标轴的平移$t_x$、$t_v$，以及围绕旋转中
+心的旋转角度够。如果允许改变旋转中心则有五个自由度。
+通过这些未知量，我们可以构造一个刚性变换矩阵$T_{rigid}$。
+它可以将一副图像中的任意点映射到另一幅图像中，成为与之对应的变换点。
+这种变换可以通过旋转变换$R$和平移变换$t=(t_x,t_y)^T$来表示，
+其中旋转矩阵R表示为：
+\begin{equation}
+  R=\begin{bmatrix}
+    cos\varphi & -sin\varphi\\
+    sin\varphi & cos\varphi\\
+  \end{bmatrix}
+\end{equation}
+点$(x,y)^T$经刚体变换到点$(x^\prime,y^\prime)^T$的变换公式为：
+\begin{equation}
+  \begin{bmatrix}
+    x^\prime\\
+    y^\prime
+  \end{bmatrix}=
+  \begin{bmatrix}
+    cos\varphi& -sin\varphi\\
+    sin\varphi& cos\varphi
+  \end{bmatrix}
+  \begin{bmatrix}
+    x\\
+    y
+  \end{bmatrix}+
+  \begin{bmatrix}
+    t_x\\
+    t_y
+  \end{bmatrix}
+\end{equation}
+其中旋转中心为坐标原点$(0,0)$，平移方向以沿坐标轴正向为正。
+\subsubsection{仿射变换}
+如果第一幅图像中的一条直线经过变换后映射到第二幅图像上仍为直线，
+并且保持平行关系，则这样的变换称为仿射变换。
+仿射变换可以分解为线性变换和平移变换。
+在二维空间中,点$(x,y)^T$经仿射变换到点$(x^\prime,y^\prime)^T$的变换公式为：
+\begin{equation}
+  \begin{bmatrix}
+    x^\prime\\
+    y^\prime
+  \end{bmatrix}=
+  \begin{bmatrix}
+    a_{11}& a_{12}\\
+    a_{21}& a_{22}
+  \end{bmatrix}
+  \begin{bmatrix}
+    x\\
+    y
+  \end{bmatrix}+
+  \begin{bmatrix}
+    t_x\\
+    t_y
+  \end{bmatrix}
+\end{equation}
+其中
+$\begin{bmatrix}
+  a_{11}& a_{12}\\ a_{21}& a_{22} 
+\end{bmatrix}$
+为满秩实矩阵，表示线性变换的部分，当它为单位正交矩阵时，
+即与刚体变换的形式相同，所以刚体变换是仿射变换的特例。
+\subsubsection{射影变换}
+如果第一幅图像中的一条直线经过变换后映射到第二幅图像中仍为直线，
+但平行关系基本不保持，则这样的变换称为射影变换。
+射影变换保持点列的交比不变，
+若A,B,C,D为同一直线上任意四点，则下式定义的CR(cross ratio)称为交比：
+\begin{equation}
+  \text{CR}(\text{A,B,C,D})=
+  \frac{\text{AC}}{\text{BC}}:\frac{\text{AD}}{\text{BD}}
+\end{equation}
+射影变换下，点$(x,y,k)^T$经投影变换到
+点$(x^\prime,y^\prime,k^\prime)^T$的变换公式为:
+\begin{equation}
+  \rho
+  \begin{bmatrix}
+    x^\prime\\y^\prime\\k^\prime
+  \end{bmatrix}=
+  \begin{bmatrix}
+    a_{11}& a_{12}& a_{13}\\
+    a_{21}& a_{22}& a_{23}\\
+    a_{31}& a_{32}& a_{33}
+  \end{bmatrix}
+  \begin{bmatrix}
+    x\\y\\k
+  \end{bmatrix}
+\end{equation}
+其中$(x^\prime,y^\prime,k^\prime)$和$(x,y,k)^T$为二维点的齐次坐标，
+消去$\rho$可得对应的非齐次坐标公式如下：
+\begin{equation}
+  \begin{cases}
+    \bar{x}^\prime=\frac{x^\prime}{k^\prime}=
+    \frac{a_{11}x+a_{12}y+a_{13}k}{a_{31}x+a_{32}y+a_{33}k}\\
+    \bar{y}^\prime=\frac{y^\prime}{k^\prime}=
+    \frac{a_{21}x+a_{22}y+a_{23}k}{a_{31}x+a_{32}y+a_{33}k}
+  \end{cases}
+\end{equation}
+当$a_{31}=0$，$a_{32}=0$时，射影变换与仿射变换具有相同的形式。
+\subsubsection{非线性变换}
+非线性变换可以把直线变换为曲线。在2D空间中,可以用一下公式表示:
+其中,F表示把第一幅图像映射到第二幅图像上的任意一种函数形式。典型的非
+线性变换如多项式变换,在2D空间中,多项式函数可写成如下形式:
+非线性变换比较适用于那些具有全局性形变的图像配准问题,以及整体近
+似刚体,但局部有形变的配准情况。本文的医学图像配准主要针对刚体变换的
+应用,如对脑部图像的配准。
+
