@@ -108,6 +108,26 @@ fi
 # if every test passed, exit
 test "${SKIP}" -ge 1 && exit 0
 
+if test "${AFFINEONLY}" -gt 0
+then
+antsRegistration \
+	--verbose 0 --dimensionality ${DIM} --float 0 \
+	--output "[${TRANS},${WMOVING}]" \
+	--interpolation Linear --use-histogram-matching 0 \
+	--winsorize-image-intensities '[0.005,0.995]' \
+	--initial-moving-transform "[$FIXED,$MOVING,1]" \
+  --transform 'Rigid[0.1]' \
+	--metric "MI[$FIXED,$MOVING,1,32]" \
+	--convergence [1000x500x250x100,1e-6,10] \
+	--shrink-factors 8x4x2x1 \
+	--smoothing-sigmas 3x2x1x0vox \
+	--transform 'Affine[0.1]' \
+	--metric "MI[$FIXED,$MOVING,1,32]" \
+	--convergence [1000x500x250x100,1e-6,10] \
+	--shrink-factors 8x4x2x1 \
+	--smoothing-sigmas 3x2x1x0vox \
+	|| { echo "Error!! failed to do registration" >&2; exit 1;}
+else
 antsRegistration \
 	--verbose 0 --dimensionality ${DIM} --float 0 \
 	--output "[${TRANS},${WMOVING}]" \
@@ -130,14 +150,24 @@ antsRegistration \
 	--shrink-factors 8x4x2x1 \
 	--smoothing-sigmas 3x2x1x0vox \
 	|| { echo "Error!! failed to do registration" >&2; exit 1;}
+fi
 
 # apply transform
+if test "${AFFINEONLY}" -gt 0
+then
+antsApplyTransforms \
+	-d ${DIM} --float 0 \
+	-i ${SEG} -r ${FIXED} -o ${WSEG} -n NearestNeighbor\
+	-t ${TRANS}1BSpline.txt \
+	|| { echo "Error!! fialed to apply transform" >&2; exit 1;}
+else
 antsApplyTransforms \
 	-d ${DIM} --float 0 \
 	-i ${SEG} -r ${FIXED} -o ${WSEG} -n NearestNeighbor\
 	-t ${TRANS}1BSpline.txt \
 	-t ${TRANS}0GenericAffine.mat \
 	|| { echo "Error!! fialed to apply transform" >&2; exit 1;}
+fi
 
 exit 0;
 
