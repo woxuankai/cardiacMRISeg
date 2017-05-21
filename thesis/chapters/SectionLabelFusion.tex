@@ -29,7 +29,7 @@
 %\end{equation}
 %式子中，$L$代表分类器的个数，$w_{k,i}(x)$是加权系数。
 %该方法中
-多数表决法(Majority voting)是最简单最直接的融合算法，
+多数投票法(Majority voting)是最简单最直接的融合算法，
 它接照少数服从多数的方法对标号图像进行融合。
 设$S(x)$为待分割图像中像素$x$处的分割标号：
 \begin{equation}
@@ -42,8 +42,64 @@
     0& L_i^\prime(x)\ne c
   \end{cases}
 \end{equation}
+其中$_i^\prime(x)$为第$i$幅形变后的图谱在像素$x$处的标记，$c$为其标记值。
+在只有一个待分割的目标时，$c$取$1$或者$0$，表示是或者不是待分割的目标。
 
+\subsection{加权投票法}
+考虑到图谱的不同，加权投票法根据一定的相似性准则，
+考虑形变后的图谱灰度图像与待分割图像的相似性作为权重，
+这个权重可以是局部相似性也可以是全局相似性。
+加权投票法的融合公式为：
+\begin{equation}
+  S(x)^\ast=arg\ \underset{c}{max}\sum_{i=1}^n\omega_i(x)\cdot
+  f(:_i^\prime(x),c)
+\end{equation}
+\begin{equation}
+  f(L_i^\prime(x),c)=
+  \begin{cases}
+    1& L_i^\prime(x)=c\\
+    0& L_i^\prime(x)\ne c
+  \end{cases}
+\end{equation}
+其中$\omega_i(x)$为待分割图像与第$i$幅图谱图像与待分割图像的相似性。
+显然，概率投票法是对多数投票法的一个改进。
+在大多数情况下，加权投票法的分割精度要优于多数投票法。
+
+\subsection{概率图谱}
+概率图谱(probabilistic atlas)的基本思想是通过一定的算法，
+由形变后的图谱标号图像计算出待分割图像中每个像素属于目标的概率值，
+即目标的概率图谱。
+平均概率图谱是最简单、最基础的概率图谱计算算法，其计算公式为：
+\begin{equation}
+  p(x)=frac{1}{n}\sum_{i=1}^{n}L_i^\prime(x)
+\end{equation}
+其中，$n$为图谱的数目，然后对概率图谱进行阈值处理，
+就可以得到最终的分割结果。
+\begin{equation}
+  S(x)=
+  \begin{cases}
+    1& p(x)\ge H\\
+    0& p(x)<H
+  \end{cases}
+\end{equation}
+其中，$H$为所设阈值，通常情况下设置为$0.5$。
 
 \subsection{STAPLE}
+STAPLE(Simultaneous Truth and Performance Level Estimation)
+由Warfield等人设计的，STAPLE算法基于最大期望算法(Expectation Maximum, EM)，
+它将每一个图谱看作为一个弱分类器，然后利用最大期望算法对每一个分类器设置权重，
+以迭代的方式完成对标号的融合，从而得到最终的分割结果。
 
-\subsection{Jonit Label Fusion}
+%\subsection{联合标记融合}%copy of 基于多atlas的心脏右心室精准分割
+%联合标记融合(Joint Label Fusion)是加权融合的一个变形，
+%传统的多Atlas分割产生的错误大多来自于配准所发生的失误，
+%而传统的融合方法不能很好地消除这种非统错误，
+%而联合标记融合可以降低这种错误的发生。
+%为简单起见，只考虑二值分割（前景和背景)，
+%即假设目标图像和Atlas标记图像的每个像素值只能取0或1。
+%概率性分割（每个像素被分配一定的标记概率）也可以从下面的加权框架理论
+%  中获得。同样地,有两个以上的标记分割问题可以分解为多个二值分割问题,也就是说
+%  选出一个标记图像,从剩余的标记图像中分割该图像。该方法对每一个标记,通过生成
+%  映射加权,利用加权选择计算得出对该标记的共同结果,对每一个像素选出具有最大值
+%  的标记图像,所以适用于多Atlas分割问题。
+%
