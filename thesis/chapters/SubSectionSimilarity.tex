@@ -23,20 +23,92 @@
 
 常用的相似性测度有灰度平均差(Mean Squares, MS)、
 归一化相关系数(Normalized Correlation Coefficient, NCC)、
-互信息(Mutual Information)、归一化互信(Normalized Mutual Information)、
+互信息(Mutual Information, MI)、
+归一化互信(Normalized Mutual Information, NMI)、
 灰度均方差(Sum of Squared Differences, SSD)、
 灰度差绝对值(Sum of Absolute Difference, SAD)等。
 
-
 \subsubsection{灰度平均差}
+图像$A$，$B$在给定区域内的灰度平均差定义为：
+\begin{equation}
+  MS(A,B)=\frac{1}{N}\sum^{N}_{i=1}(A_i-B_i)^2
+\end{equation}
+其中，$N$表示给定区域内的像素个数，
+$A_i$和$B_i$分别代表第$i$个像素位置处的灰度值。
+该测度在理想情况下最优值为0，表示两幅图像在给定区域的灰度值完全相同。
+应用该相似性测度基于如下的假设：两幅图像对应像素点灰度值相同，
+因此该准则只适用于同模态图像配准。
+该准则计算简单，相对来说可以在一个比较大的范围内搜索匹配，
+但对图像灰度值的线性变化比较敏感。
 
 \subsubsection{归一化相关系数}
+对待配准图像$A$、$B$在所需评估区域内，其归一化相关系数定义为：
+\begin{equation}
+  NCC(A,B)=\frac{\sum_i^N(A_{i=1}\times B_{i=1})}%
+  {\sqrt{\sum_{i=1}^NA^2_i\times \sum_{i=1}^NB_i^2}}
+\end{equation}
+该值在理想情况下最优值为1，表示两幅图像之间像素强度值完全相同。
+该测度也仅适用于单模态图像的配准算法评估。
 
-\subsubsection{互信息}
+\subsubsection{互信息量}
+在医学图像配准中，
+待配准的两幅图像可能来自于不同的时间或不同的成像设备，
+但它们都基于共同的人体解剖位置，
+因此我们把两幅图像看成是两个随机变量时，
+两者应该具有某种程度的相关性。
+给定$A$，$B$两幅图像，两幅图像之间的互信息定义为：
+\begin{equation}
+  MI(A,B)=H(A)+H(B)-H(A,B)
+\end{equation}
+\begin{equation}
+  H(A)=-\sum_ap_A(a)log\ p_A(a)
+\end{equation}
+\begin{equation}
+  H(A,B)=-\sum_{a,b}p_{A,B}(a,b)log\ p_{A,B}(a,b)
+\end{equation}
+其中$H(A)$表示$A$的熵，$H(A,B)$是图像$A$和$B$的联合熵，
+$p_A(a)$表示像素$a$在图像$A$中出现的概率，
+$p_{A,B}(a,b)$表示图像$A$和$B$的联合概率密度。
 
-\subsubsection{归一化互信息}
+通过以上几式可得：
+\begin{equation}
+  MI(A,B)=-\sum_{a,b}p_{A,B}(a,b)log\frac{p_{A,B}(a,b)}{p_A(a)p_B(b)}
+\end{equation}
+
+当两幅图像在空间中位置达到一致时，其互信息应该为最大，反之最小。
+互信息量不仅可以用于单模态图像配准中，
+而且可以用在多模态的图像配准，
+可以较好的应用于图像配准的各个领域。
+
+\subsubsection{归一化互信息量}
+在互信息量的基础上，Studholume提出了改进的互信息，
+即归一化互信息量和熵关系数(Entropy Correlation Coefficient, ECC)，
+定义如下：
+\begin{equation}
+  NMI(A,B)=\frac{H(A)+H(B)}{H(A,B)}
+\end{equation}
+\begin{equation}
+  ECC(A,B)=\frac{2I(A,B)}{H(A)+H(B)}
+\end{equation}
+
+归一化互信息对于图像重叠的敏感度降低，能够将配准精度提高。
 
 \subsubsection{灰度均方差}
+灰度均方差代表两幅图像中所有灰度差的平方和，该值越小，表明图像的相似度越高。
+定义如下：
+\begin{equation}
+  SSD(A,B)=\frac{1}{N}\sum_{\Omega}(a-b)^2
+\end{equation}
+其中，$\Omega$代表图像的全域，
+$a$、$b$分别是图像$A$、$B$中相同位置上像素点的灰度值。
+该测读也只适用与同模态的图像配准。
 
 \subsubsection{灰度差绝对值}
+灰度差绝对值与灰度均方差类似，它是将图像间灰度差的绝对值进行求和，
+所以灰度绝对值使用范围与灰度均方差一样，不能应用在异模态的配准中。
+灰度差绝对值定义为：
+\begin{equation}
+  SAD(A,B)=\frac{1}{N}\sum_\Omega\lvert a-b\rvert
+\end{equation}
+
 
