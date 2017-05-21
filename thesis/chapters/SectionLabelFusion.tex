@@ -52,7 +52,7 @@
 加权投票法的融合公式为：
 \begin{equation}
   S(x)^\ast=arg\ \underset{c}{max}\sum_{i=1}^n\omega_i(x)\cdot
-  f(:_i^\prime(x),c)
+  f(L_i^\prime(x),c)
 \end{equation}
 \begin{equation}
   f(L_i^\prime(x),c)=
@@ -71,7 +71,7 @@
 即目标的概率图谱。
 平均概率图谱是最简单、最基础的概率图谱计算算法，其计算公式为：
 \begin{equation}
-  p(x)=frac{1}{n}\sum_{i=1}^{n}L_i^\prime(x)
+  p(x)=\frac{1}{n}\sum_{i=1}^{n}L_i^\prime(x)
 \end{equation}
 其中，$n$为图谱的数目，然后对概率图谱进行阈值处理，
 就可以得到最终的分割结果。
