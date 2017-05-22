@@ -33,20 +33,26 @@ ITK的C++实现风格被称为通用编程（即使用模板代码）。
 这样的C ++模板意味着代码是高效的，并且在编译时和运行时运行程序时会发现许多软件问题。
 \citeup{InsightToolKit}
 \subsection{SimpleITK}
-SimpleITK是建立在ITK之上的、
- SimpleITK is a simplified layer built on top of ITK, intended to facilitate its use in rapid prototyping, education, interpreted languages. SimpleITK has the following main characteristics:
-C++ library with wrappers for Python, Java, CSharp, R, Tcl and Ruby
-Object-oriented
-Provides a simplified, easy-to-use, procedural interface without templates
-Is distributed under an open source Apache 2.0 License
-Binary distributions for Python, Java and CSharp
+SimpleITK是建立在ITK之上的、简化的接口，
+它存在的目的是方便ITK在快速原型设计、教育、解释型语言方面的使用。
+SimpleITK的主要特点如下：
 \citeup{LowekampDesignOfSimpleITK2013}
+\begin{enumerate}
+\item 提供Python, Java, CSharp, R, Tcl 和 Ruby的C++库。
+\item 面向对象设计。
+\item 提供简化的、方便使用的、没有模板类的程序接口。
+\item 在开源的Apache 2.0许可证下发布。
+\item 为Python,Java和CSharp提供二进制发行文件。
+\end{enumerate}
 
 \subsection{ANTs}
-Advanced Normalization Tools
-ANTs是基于ITK开发的一款软件，提供了
-Advanced Normalization Tools (ANTS) is an ITK-based suite of normalization, segmentation and template-building tools for quantitative morphometric analysis. Many of the ANTS registration tools are diffeomorphic, but deformation (elastic and BSpline) transformations are available. Unique components of ANTS include multivariate similarity metrics, landmark guidance, the ability to use label images to guide the mapping and both greedy and space-time optimal implementations of diffeomorphisms. The symmetric normalization (SyN) strategy is a part of the ANTS toolkit as is directly manipulated free form deformation (DMFFD).
-ANTs computes high-dimensional mappings to capture the statistics of brain structure and function. 
+ANTs(Advanced Normalization Tools)也是基于ITK开发的一款软件，
+提供了正则化、图像分割、模板建立等量化形态学分析工具。
+与SimpleITK不同，ANTs提供的是能直接运行的程序（工具）而不是库。
+许多ANTs配准工具是微分同胚的，但也有形变变换（elastic和BSpline）的。
+ANTs还提供了一些独占的组件，例如多变量相似性测度方法，
+地标指导(landmark guidance)，使用标签图片指导映射，
+以及不同形态的贪婪和时空优化实现。
 
 \section{实验数据}
 
@@ -69,7 +75,6 @@ DET0002701号数据(d0)共20帧，每帧数据$x,y,z$为$256,256,12$。
 注意比较左心室壁的厚度变化和右心室的形变。
 \pic[htpb]{DET0002701号数据第1帧图像（从上到下、从左到右为心尖到心脏基部）}{width=\textwidth}{OneVolume}
 \pic[htpb]{DET0002701号数据第9层图像（从上到下、从左到右为一个心动周期）}{width=\textwidth}{The7thSlice}
-
 
 \section{图像配准}
 
