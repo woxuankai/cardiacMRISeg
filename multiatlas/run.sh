@@ -92,13 +92,13 @@ do
     # <=> NUM_SLICE*(ONESLICE-2) < SLICE*NUM_SLICE &&
     #     SLICE*NUM_SLICE < NUM_SLICE*(ONESLICE+2)
     # echo $((${NUM_SLICE}*(${ONESLICE}-2))) $((${SLICE}*${ATLAS_NUM_SLICE})) $((${NUM_SLICE}*(${ONESLICE}+2)))
-    MARGIN=2
+    MARGIN=2 #####disabled
     if test 0 -eq \
       $((${NUM_SLICE}*(${ONESLICE}-${MARGIN})<${SLICE}*${ATLAS_NUM_SLICE})) ||\
       test 0 -eq \
       $((${NUM_SLICE}*(${ONESLICE}+${MARGIN}) > ${SLICE}*${ATLAS_NUM_SLICE}))
     then
-      continue
+      continue 
     fi
     for ONEVOLUME in $(seq 0 $((${ATLAS_NUM_VOLUME} - 1)))
     do
