@@ -37,15 +37,6 @@ done
 }
 
 
-# xmin xsize ymin ysize zmin zsize 
-#PARMAX=(129 117)
-#PARMIN=(58 33)
-#ATLAS='DET000101.nii.gz'
-#NUM='0'
-#ATLAS_IMAGE="../data/${ATLAS}"
-#ATLAS_LABEL="../seg/${ATLAS}"
-#OUTPUT_PREFIX="./data/d${NUM}"
-#doroi
 
 #PAR='100 81  61 101'
 PARMIN=(100 61)
@@ -74,5 +65,46 @@ ATLAS_IMAGE='../data/DET0016101.nii.gz'
 ATLAS_LABEL='../seg/DET0016101_seg.nii.gz'
 OUTPUT_PREFIX='./data/d2'
 doroi
+
+
+# xmin xsize ymin ysize zmin zsize 
+PARMAX=(161 144)
+PARMIN=(89 72)
+ATLAS='DET001101.nii.gz'
+NUM='3'
+ATLAS_IMAGE="../data/${ATLAS}"
+ATLAS_LABEL="../seg/${ATLAS}"
+OUTPUT_PREFIX="./data/d${NUM}"
+doroi
+
+PARMAX=(151 161)
+PARMIN=(76 69)
+ATLAS='DET001401.nii.gz'
+NUM='4'
+ATLAS_IMAGE="../data/${ATLAS}"
+ATLAS_LABEL="../seg/${ATLAS}"
+OUTPUT_PREFIX="./data/d${NUM}"
+doroi
+
+PARMAX=(173 145)
+PARMIN=(81 31)
+ATLAS='DET001701.nii.gz'
+NUM='5'
+ATLAS_IMAGE="../data/${ATLAS}"
+ATLAS_LABEL="../seg/${ATLAS}"
+OUTPUT_PREFIX="./data/d${NUM}"
+doroi
+
+
+PARMAX=(174 165)
+PARMIN=(86 58)
+ATLAS='DET002501.nii.gz'
+NUM='6'
+ATLAS_IMAGE="../data/${ATLAS}"
+ATLAS_LABEL="../seg/${ATLAS}"
+OUTPUT_PREFIX="./data/d${NUM}"
+doroi
+
+
 
 exit 0
