@@ -117,12 +117,13 @@ done
 
 #ATLASES=$(ls ./data | fgrep -v "s${SPEC}" | fgrep -v seg)
 unset ARG
+mkdir -p ./output/affine
 for BASENAME in ${BASENAMES[@]}
 do
 	ARG="${ARG} \
 -i ./data/${BASENAME}.nii.gz -l ./data/${BASENAME}_seg.nii.gz \
--w ./output/${TARGET}-${BASENAME}-warpedimage.nii.gz \
--a ./output/${TARGET}-${BASENAME}-warpedlabel.nii.gz"
+-w ./output/affine/${TARGET}-${BASENAME}-warpedimage.nii.gz \
+-a ./output/affine/${TARGET}-${BASENAME}-warpedlabel.nii.gz"
 done
 
 test "$VERBOSE" -ge 3 && echo "altases argument ${ARG}"
@@ -135,6 +136,42 @@ function dodice(){ # 1-> prediction 2->target  (file path)
 	return 0
 	}
 
+LNDOUBLE="$((LN*3))"
+
+DOMAS='./multi_atlas_seg.sh \
+	-t "./data/${TARGET}.nii.gz" \
+	-p "${PREDICTION}" \
+	-v 1 \
+	-j "${JOBS}" \
+	-n "${LNDOUBLE}" \
+	-f "${FUSIONMETHOD}" \
+  -o 1 \
+	${ARG}'
+
+set -o pipefail
+while read ONESEG ONEIMG ONESIM ONELABEL CHOSENI 
+do 
+  CHOSENIS[${#CHOSENIS[@]}]="$CHOSENI"
+done <<< $(eval "${DOMAS}" | fgrep ".nii.gz" | tr ':' ' ')
+test "$?" -eq 0 || \
+	{ echo "failed to do multi-atlas-segmentation and/or dice" >&2; exit 1; }
+set +o pipefail
+
+
+
+# second MAS
+mkdir -p ./output/nonrigid
+unset ARG
+for i in ${CHOSENIS[@]}
+do
+  BASENAME="${BASENAMES[$i]}"
+	ARG="${ARG} \
+-i ./data/${BASENAME}.nii.gz -l ./data/${BASENAME}_seg.nii.gz \
+-w ./output/nonrigid/${TARGET}-${BASENAME}-warpedimage.nii.gz \
+-a ./output/nonrigid/${TARGET}-${BASENAME}-warpedlabel.nii.gz"
+done
+
+test "$VERBOSE" -ge 3 && echo "second altases argument ${ARG}"
 
 DOMAS='./multi_atlas_seg.sh \
 	-t "./data/${TARGET}.nii.gz" \
@@ -145,11 +182,12 @@ DOMAS='./multi_atlas_seg.sh \
 	-f "${FUSIONMETHOD}" \
 	${ARG}'
 
+
 if test "${VERBOSE}" -eq 1
 then
 	set -o pipefail
 	eval "${DOMAS}" | fgrep ".nii.gz" | tr ':' ' ' | \
-		{ while read ONESEG ONEIMG ONESIM; \
+		{ while read ONESEG ONEIMG ONESIM ONELABEL CHOSENI; \
 		do dodice "${ONESEG}" "data/${TARGET}_seg.nii.gz"; \
 			echo -e ":${ONEIMG}"; done }
 	test "$?" -eq 0 || \

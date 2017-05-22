@@ -160,7 +160,7 @@ then
 antsApplyTransforms \
 	-d ${DIM} --float 0 \
 	-i ${SEG} -r ${FIXED} -o ${WSEG} -n NearestNeighbor\
-	-t ${TRANS}1BSpline.txt \
+	-t ${TRANS}0GenericAffine.mat \
 	|| { echo "Error!! fialed to apply transform" >&2; exit 1;}
 else
 antsApplyTransforms \

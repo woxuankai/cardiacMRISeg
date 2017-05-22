@@ -31,6 +31,7 @@ multi_atlas_seg.sh
   [-c atlas chosen method, default 2.
     0:MeanSquareDifference, 1:Cross-Correlation, 2:Mutual Information]
   [-s skip if possible( according to file modification date), default 0]
+  [-o use affine registration only, default 0]
   [-h (help)]
   -i <atlas_image1> -l <atlas_label1> -w <warped_image1> -a <warped_label1>
   -i <atlas_image2> -l <atlas_label2> -w <warped_image2> -a <warped_label2>
@@ -69,12 +70,13 @@ FUSENUM='4' # n
 FUSIONMETHOD='majorityvote' # f
 CHOSENMETHOD='2' # c
 SKIP='1' # s
+AFFINEONLY='0'
 
 # atlas choose metric
 CHOSENMETHODNAMES=("MSQ" "CC" "MI")
 
 # parse arguments
-while getopts 't:p:i:l:j:n:v:f:s:d:hw:a:c:' OPT
+while getopts 'a:c:d:f:hi:j:l:n:o:p:s:t:v:w:' OPT
 do
   case $OPT in
     t) # target
@@ -112,6 +114,9 @@ do
       ;;
     c) # altas chosen method
       CHOSENMETHOD="$OPTARG"
+      ;;
+    o) # affine registration only
+      AFFINEONLY="$OPTARG"
       ;;
     h) # help
       usage
@@ -156,6 +161,8 @@ test "${FUSIONMETHOD}" = "majorityvote" || \
   { echo "invalid -f ${FUSIONMETHOD}" >&2; exit 1; }
 test "${SKIP}" -ge 0 || \
   { echo "skip (-s) should >= 0" >&2; exit 1; }
+test "${AFFINEONLY}" -ge 0 ||\
+  { echo "-o affine only should >=0" >&2; exit 1; }
 
 test "${VERBOSE}" -ge 2 && report_parameters
 test "${VERBOSE}" -ge 3 && \
@@ -190,6 +197,7 @@ do
     -s '${WARPED_LABEL}' \
     -w '${WARPED_IMAGE}' \
     -k '${SKIP}' \
+    -a '${AFFINEONLY}' \
     \n"
 done
 SHOWBAR=''
@@ -219,7 +227,7 @@ do
   if test "${SKIP}" -gt "0" && \
     test -r "${SIMILARITYFILE}" && \
     test "${SIMILARITYFILE}" -nt "${WARPED_IMAGES[$i]}" && \
-    grep "${CHOSENMETHODNAME}"':' "${SIMILARITYFILE}"
+    fgrep -q "${CHOSENMETHODNAME}"':' "${SIMILARITYFILE}"
   then
     SIMILARITY=$(cat "${SIMILARITYFILE}" | grep "${CHOSENMETHODNAME}:" | \
       cut -d':' -f2)
@@ -272,7 +280,8 @@ do
           -eq 1 && \
     LABELS_CHOSEN[${#LABELS_CHOSEN[@]}]="${WARPED_LABELS[$i]}" && \
     test "$VERBOSE" -ge 1 && \
-      echo "${WARPED_LABELS[$i]} : ${ATLAS_IMAGES[$i]} : ${SIMILARITIES[$i]}"
+      echo "${WARPED_LABELS[$i]} : ${ATLAS_IMAGES[$i]} :\
+ ${SIMILARITIES[$i]} : ${ATLAS_LABELS[$i]} : $i"
 done
 
 # fuse
