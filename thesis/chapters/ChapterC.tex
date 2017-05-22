@@ -1,14 +1,78 @@
 % !Mode:: "TeX:UTF-8"
 
 \chapter{多图谱方法分割心脏}
+为了验证上一章所述多谱图配准理论，
+本章实现了对心脏左心室心内膜和心外膜之间心肌的分割。
 
-这篇文章中提到的配准方法，由基于
+\section{平台与工具}
+在算法的实现中，我们基于Linux(Debian sid)操作系统和Bash与Python语言，
+使用ANTs\citeup{ANTsRegistration,ANTsBspline}、
+SimpleITK\citeup{LowekampDesignOfSimpleITK2013}和
+ITK\citeup{ITKBookDevelop,ITKBookDesign,InsightToolKit}工具
+进行配准、图谱选择、标签融合、度量分割结果准确性等操作，
+并使用了GNU Parallel\citeup{GNUParallel}工并行加速。
+
+%ants、ITK简介？凑字数
+\subsection{ITK}
+ITK(Insight Segmentation and Registration Toolkit)
+是一种跨平台的、开源的应用程序开发框架，
+被广泛用于图像分割和图像配准的开发。
+图像分割是辨别和分类数字采样得到的数据的一个过程。
+例如，从CT或MRI扫描仪等医疗仪器中得到的数据。
+图像配准是一个对齐或者是寻找数据之间对应关系的任务。
+例如，在医疗环境中，可以将CT扫描与MRI扫描对准，
+以便融合包含在两者中的信息。
+
+ITK由美国国家医学图书馆（National Library of Medicine U.S.）资助开发，
+作为分析可见人类项目(Visible Human Project)图像的开放算法资源。
+ITK提供了非常前沿的、在二维、三位或者更高维度上配准和分割算法。
+ITK使用CMake构建环境来管理配置过程。
+该软件是用C++实现的，也提供了Python和Java的接口。
+这使得开发人员可以使用各种编程语言来创建软件。
+ITK的C++实现风格被称为通用编程（即使用模板代码）。
+这样的C ++模板意味着代码是高效的，并且在编译时和运行时运行程序时会发现许多软件问题。
+\citeup{InsightToolKit}
+\subsection{SimpleITK}
+SimpleITK是建立在ITK之上的、
+ SimpleITK is a simplified layer built on top of ITK, intended to facilitate its use in rapid prototyping, education, interpreted languages. SimpleITK has the following main characteristics:
+C++ library with wrappers for Python, Java, CSharp, R, Tcl and Ruby
+Object-oriented
+Provides a simplified, easy-to-use, procedural interface without templates
+Is distributed under an open source Apache 2.0 License
+Binary distributions for Python, Java and CSharp
+\citeup{LowekampDesignOfSimpleITK2013}
+
+\subsection{ANTs}
+Advanced Normalization Tools
+ANTs是基于ITK开发的一款软件，提供了
+Advanced Normalization Tools (ANTS) is an ITK-based suite of normalization, segmentation and template-building tools for quantitative morphometric analysis. Many of the ANTS registration tools are diffeomorphic, but deformation (elastic and BSpline) transformations are available. Unique components of ANTS include multivariate similarity metrics, landmark guidance, the ability to use label images to guide the mapping and both greedy and space-time optimal implementations of diffeomorphisms. The symmetric normalization (SyN) strategy is a part of the ANTS toolkit as is directly manipulated free form deformation (DMFFD).
+ANTs computes high-dimensional mappings to capture the statistics of brain structure and function. 
+
+\section{实验数据}
+
+我们使用MICCAI 2013 SATA Workshop on  Cardiac Left Ventricle Segmentation
+提供的数据对我们的算法进行检验。
+MICCAI2013数据集共有155个电影式磁共振图像。
+其中用于训练的数据83个，用于测试的数据72个。
+每个数据最多包含30帧最少包含15帧三维图像。
+每个体数据由12到30个切片组成。
+每层图像分辨率为$192\times192$。
+这些数据同样来自心脏图谱工程
+\citeup{FonsecaCAP2011,SuinesiaputraBigHeartData2015}
+(Cardiac Atlas Project, CAP)。
+由于我们没有测试数据集的金标准，所以只能从训练数据集中挑选。
+本文中，我们选取DET0002701号数据(d0)作为目标图像，DET0009301，DET0016101，DET0001101，DET0001401，DET0001701，DET0002501号数据作为图谱(d1-d6)。
+值得注意的是，每一个数据都是四维的。
+DET0002701号数据(d0)共20帧，每帧数据$x,y,z$为$256,256,12$。
+图\ref{OneVolume}展示了DET0002701号数据的第1帧图像，
+图\ref{The7thSlice}展示了DET0002701号图像的第9层数据在一个心动周期内的变化，
+注意比较左心室壁的厚度变化和右心室的形变。
+\pic[htpb]{DET0002701号数据第1帧图像（从上到下、从左到右为心尖到心脏基部）}{width=\textwidth}{OneVolume}
+\pic[htpb]{DET0002701号数据第9层图像（从上到下、从左到右为一个心动周期）}{width=\textwidth}{The7thSlice}
+
 
 \section{图像配准}
 
-我们使用了ANTs\citeup{ANTsRegistration,ANTsBspline}和
-ITK\citeup{ITKBookDevelop,ITKBookDesign,InsightToolKit}工具进行配准，
-并使用了GNU Parallel\citeup{GNUParallel}工具加速。
 
 \section{图谱选择}
 

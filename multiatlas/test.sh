@@ -14,7 +14,7 @@ do
 		done
 	done
 done
-
+exit 0
 
 for i in 1
 do

@@ -70,7 +70,7 @@ doroi
 # xmin xsize ymin ysize zmin zsize 
 PARMAX=(161 144)
 PARMIN=(89 72)
-ATLAS='DET001101'
+ATLAS='DET0001101'
 NUM='3'
 ATLAS_IMAGE="../data/${ATLAS}.nii.gz"
 ATLAS_LABEL="../seg/${ATLAS}_seg.nii.gz"
@@ -79,7 +79,7 @@ doroi
 
 PARMAX=(151 161)
 PARMIN=(76 69)
-ATLAS='DET001401'
+ATLAS='DET0001401'
 ATLAS_IMAGE="../data/${ATLAS}.nii.gz"
 ATLAS_LABEL="../seg/${ATLAS}_seg.nii.gz"
 NUM='4'
@@ -88,7 +88,7 @@ doroi
 
 PARMAX=(173 145)
 PARMIN=(81 31)
-ATLAS='DET001701'
+ATLAS='DET0001701'
 NUM='5'
 ATLAS_IMAGE="../data/${ATLAS}.nii.gz"
 ATLAS_LABEL="../seg/${ATLAS}_seg.nii.gz"
@@ -98,7 +98,7 @@ doroi
 
 PARMAX=(174 165)
 PARMIN=(86 58)
-ATLAS='DET002501'
+ATLAS='DET0002501'
 NUM='6'
 ATLAS_IMAGE="../data/${ATLAS}.nii.gz"
 ATLAS_LABEL="../seg/${ATLAS}_seg.nii.gz"
