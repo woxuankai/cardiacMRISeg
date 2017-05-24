@@ -1,9 +1,230 @@
 % !Mode:: "TeX:UTF-8"
 
-\chapter*{此名有诗意}
-\section*{2. xxx}
-\subsection*{2.1. xxx}
-\subsubsection*{2.1.1. xxxx}
-\section*{5. xxx}
-\subsection*{5.2 xxx}
-\subsubsection*{5.2.1 xxxx}
+\chapter*{Multi-atlas based segmentation of brain images:
+Atlas selection and its effect on accuracy}
+\section*{Abstract}
+\section*{Introduction}
+\section*{Methods}
+\subsection*{Background: multi-atlas segmentation}
+\subsection*{Atlas selection}
+\subsubsection*{Motivation and background}
+The size of the atlas database can affect
+various aspects of the process of multi-atlas segmentation
+as well as the quality of the final segmentation.
+As discussed in Background: multi-atlas segmentation,
+the average segmentation accuracy 
+achieved by fusing random sets of atlases increases asymptotically
+as the number fused becomes large.
+This asymptotic increase in accuracy means that
+there are diminishing returns in using larger and larger numbers of atlases.
+For a large atlas database, however,
+the increased computational cost of registering
+large numbers of atlases to the query image is an immediate practical problem.
+A second difficulty relates to the way
+in which an anatomical structure might vary across the population.
+If a structure is represented by, say,
+two morphologically distinct variants in the population
+(and in the atlas database),
+then fusing a large number of atlases may give a shape
+that does not represent either variant very well.
+In such circumstances, for a given query subject,
+only a proper subset of the atlases in the database is appropriate to use
+— those sharing the variant represented in the query.
+Finally, in our experience,
+the fusion of a large number of atlases
+is more likely to create a smooth estimate of the structure
+being segmented and yet a shape which is less smooth may be a better estimate.
+
+For such reasons, the selection of a limited number of atlases,
+appropriate for the query subject and prior to multi-atlas segmentation,
+would appear preferable to the fusion of
+an arbitrarily large number of atlases.
+Furthermore, it is natural to ask
+whether the asymptotic level of accuracy given by
+fusing large numbers of random atlases is the best that can be achieved,
+i.e. whether it is possible to equal or exceed this accuracy
+by fusing a smaller number of selected atlases.
+
+In previous work on atlas-based segmentation,
+the term `selection' has typically been used to describe
+the identification of the single best atlas for propagation to a query
+(see, for example, Rohlfing et al. (2004a) and Wang et al. (2005)).
+Han et al. (2008)
+compare the selection of a single atlas against
+the propagation and fusion of their entire atlas database.
+Our earlier work (Aljabar et al., 2007) and
+the work in this paper contrasts with these approaches
+as we apply selection to whole sets of atlases prior
+to propagation to the target and decision fusion.
+Klein et al. (2008) use a similar approach
+where multi-atlas segmentation is carried out
+using only atlases that reach a user-defined threshold of similarity
+with the target.
+For a given threshold, the number of atlases used for different targets
+may vary.
+Our work contrasts this by fixing (for each experiment) the number of atlases
+selected for different targets.
+This enables an assessment of the effect of selection on segmentation quality
+across a range of subjects.
+
+The selection of atlases for segmenting a particular query image
+also has parallels with clustering problems. For a large atlas database,
+it is possible to search for clusters or modes of the population it
+represents. Given an unseen query image and an estimate of the
+cluster it belongs to, a better segmentation is expected using images
+from the same cluster rather than from different ones. See Blezek and
+Miller (2007) and Sabuncu et al. (2008) for examples of clustering
+approaches applied to brain MR images.
+
+
+\subsubsection*{Proposed methods for selection}
+Given a large atlas database, a fixed subset size and a query image,
+it is theoretically possible to identify the optimal subset of atlases for
+generating a multi-atlas segmentation of the query. Leaving aside the
+question of how segmentations given by different subsets can be
+compared, exhaustively searching all possible subsets is clearly
+impractical for a large database.
+
+We therefore present an alternative heuristic approach that uses a
+measure of the ‘similarity’ of each atlas to the query subject. Once
+assigned, this measure can be used to rank the atlases. Multi-atlas
+segmentation can then be carried out using a number of the top-ranked
+atlases. A simple approach is to interpret similarity as image similarity,
+i.e. to derive it from the intensities in the query and atlas images.
+Alternatively, similarity may be derived from meta-information relating
+to the subjects. The ranking of each atlas is then based on how closely
+the atlas subject matches the query in terms of a clinical variable, such
+as age, pathology, clinical history, genetics, gender, handedness, etc.
+
+\subsubsection*{Selection using image similarity}
+A selection framework that relies on evaluating the similarity of a
+pair of images (an atlas and a query image) requires an estimate of the
+correspondence between them. It is possible to align all the atlases to
+each new query prior to making a selection. In order to avoid the
+computational burden of a large number of registrations direct to the
+query, we apply a selection framework that makes use of a standard
+space defined by a reference image.
+
+This approach identifies an arbitrary reference image in advance
+and all atlases in the database are aligned to it. When a new query
+image is given, it is also aligned in the same way to the reference. The
+image similarity of the query image and each of the atlases can then be
+evaluated, since they are all aligned. These similarity values can then
+be used to assign ranks. The top-ranked atlases are selected and
+registered directly to the query in order to generate a multi-atlas
+segmentation estimate in the native space of the query image. This
+approach uses two types of registrations: those that align images to
+the reference prior to selection and those used to propagate atlases
+when generating the multi-atlas segmentations. This selection framework
+is illustrated schematically in \ref{TranslationSelection}. 
+\setcounter{chapter}{5}
+\pic[htpb]{ Multi-atlas segmentation with image similarity selection.
+Left: All the atlas anatomies $A_i$
+and the query image $Q$ are registered to the reference image $R$.
+Similarities between the spatially normalised query and each of the atlases
+are used to generate ranks.
+Right: Top-ranked atlases are selected and registered directly
+to the query image.
+The selected atlas segmentations $L_i$ are propagated to the query
+giving the segmentations $L^\prime_i$
+which are fused to generate the native space segmentation estimate $L_Q$
+for the query image.
+}{width=0.5\textwidth}{TranslationSelection}
+
+Image similarity can be expressed using a variety of metrics,
+including sums of squared differences (SSD), cross-correlation (CC),
+mutual information (MI) (Collignon et al., 1995; Viola and Wells, 1995)
+and normalised mutual information (NMI) (Studholme et al., 1999). In
+the context of image registration, information theoretic measures such
+as MI and NMI are intended for aligning multi-modality images. In the
+context of selection, this makes such measures more appropriate for
+images with widely differing levels of contrast and appearance, for
+example if they were acquired on different MR scanners.
+
+A related choice concerns the region over which to evaluate the
+similarity metric. The region of interest (ROI) where the similarity
+metric is evaluated can be the complete overlap of the atlas and query
+images, or it can be made more specific. For example, if a hippocampal
+segmentation is required, the ROI might represent a suitably located
+region that is large enough to be likely to encompass the target
+hippocampus and yet small enough to avoid evaluating the similarity
+metric over regions distant from the structure of interest that have
+little effect on its segmentation.
+
+Another choice relating to image similarity selection concerns the
+transformations used during the registrations. These can be rigid,
+affine or non-rigid and, in the non-rigid case, the degree of local
+control (or flexibility) can be varied. As mentioned above, the spatially
+normalising transformations that are carried out prior to selection
+(\ref{TranslationSelection} left)
+need to be distinguished from the transformations used to
+propagate atlas segmentations after selection and directly to the
+query image (\ref{TranslationSelection} right).
+The principle we have adopted for spatially
+normalising transformations is that they should correct for gross
+differences in orientation and configuration but should not correct for
+small scale differences, as this will tend to make the atlases very
+similar to each other and harder to rank with respect to a given query
+
+By contrast, the propagation of atlases during multi-atlas segmentation
+uses transformations with a high degree of local control which,
+as discussed in Background: multi-atlas segmentation, have been
+shown to generate more accurate segmentations. The non-rigid
+registration method used to propagate atlas segmentations can be
+chosen from among a number of different approaches (see Zitová and
+Flusser (2003) for an overview). This work uses the free-form
+deformation (FFD) model of Rueckert et al. (1999) where displacements
+at a lattice of control points are blended using B-spline basis
+functions (De Boor, 1978).
+
+Another distinction needs to be made between the use of a
+similarity metric for selection and its use for registration. During
+registration, the similarity metric is used as an optimisation objective
+function, whereas for selection, the similarity metric is evaluated once
+post hoc for the query and atlas images after alignment. We have used
+the same metric (NMI) for selection and for registrations (both pre-
+and post-selection) although there is no strict requirement that the
+same metric is used in all stages.
+
+The type of spatial normalisation carried out has an effect on the
+selection process. If the atlases and the query are only rigidly aligned
+to the standard space, selection will favour atlases that are already
+very similar in size and configuration to the query while some atlases
+may be rejected that could have been useful for segmentation after, for
+example, a global change of scale.
+
+In contrast, high-resolution non-rigid normalisation implies that
+the variation among atlas subjects is mainly represented in the
+normalising transformations rather than the aligned images and an
+image-based ranking of the atlases becomes harder to apply.
+
+While it is possible to extract features from transformations as a
+basis for selection (see for example Commowick and Malandain
+(2007)), our focus in this work is on image similarity as a selection
+criterion and an intermediate level of spatial normalisation is used.
+These could be, for example, affine 12-parameter transformations or
+coarse non-rigid transformations that only correct for large scale
+configurational differences.
+
+In terms of computation, most of the cost of multi-atlas segmentation
+with image similarity selection is incurred by registrations.
+If N atlases are in the database and S of the top-ranked atlases
+are propagated and fused,
+then the number of registrations for a given query is 1 + N + S.
+The N registrations spatially normalising the atlases prior to selection can,
+however, be carried out `off-line' so that the bulk of
+the on-line computational cost is represented by
+the S fine-scale non-rigid registrations
+that propagate the segmentations to the query.
+
+\subsubsection*{Selection using meta-information}
+\section*{Data and experiments}
+\subsection*{Atlas database and choice of standard space}
+\subsection*{Implementation}
+\subsubsection*{Image similarity selection: assessing the accuracy obtained}
+\subsubsection*{Image similarity as a selection criterion}
+\subsubsection*{Varying the number of atlases selected}
+\subsubsection*{Comparing similarity- and age-based selection}
+\section*{Discussion}
+\section*{Acknowledgments}
+\section*{References}
