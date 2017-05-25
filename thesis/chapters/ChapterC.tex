@@ -113,13 +113,13 @@ ROI的设置与配准结果直接相关，选择的原则如下：
 由于磁共振采集到图像容易产生灰度不均以及某些部位灰度异常的情况，
 我们需要在配准之前对图像灰度进行校正。
 又由于多图谱方法中，最后还会进行图谱挑选、融合分割结果等步骤，
-所以我们采取了非常简单的灰度校正方法---加窗。
+所以我们采取了非常简单的灰度校正方法：
 统计像素灰度值并排序，
-然后将第5\%和95\%的像素的灰度值设置为最大值和最小值后加窗，
-得到的图像再进行配准。
+然后将第5\%和95\%的像素的灰度值设置为最大值和最小值后重新分配灰度值，
+得到的图像再进行配准。这个方法与图像加窗显示类似。
 
-图\ref{WinBefore}\ref{WinBefore}分别展示了灰度校正之前和之后的结果，
-注意图像胸腔前侧高亮部分。
+图\ref{WinBefore}\ref{WinAfter}分别展示了灰度校正之前和之后的结果，
+图\ref{WinBefore}中，图像胸腔前侧高亮部分导致整个图像看起来较暗。
 \begin{pics}[htpb]{图像相似度测度方法比较}{WinComparation}
   \addsubpic{原图}{width=0.45\textwidth}{WinBefore}
   \addsubpic{校正后的结果}{width=0.45\textwidth}{WinAfter}
@@ -166,16 +166,23 @@ ROI的设置与配准结果直接相关，选择的原则如下：
 在每一层次图像，高斯模糊中参数$\sigma$分别为3，2，1和0。
 
 \subsection{配准结果}
-使用上述方法，示例配准结果如下。图\ref{RegistrationTarget}，
-\ref{RegistrationAtlas}，\ref{RegistrationWarpedAtlas}，
-\ref{RegistrationPrediction}，\ref{RegistrationGroundTruth}
-分别展示了待配准图像、图谱、变形后的图谱、分割结果、手工分割结果。
+使用上述方法，示例配准结果如下。
+图\ref{RegistrationAtlasImage}是图谱图像；
+图\ref{RegistrationTarget}是待配准的目标图像；
+图\ref{RegistrationWarpedAtlasImage}是变形后图谱图像，
+仔细比较，变形后的图谱图像已经和目标图像比较相似了；
+图\ref{RegistrationAtlasLabel}是图谱标签，即对图谱图像的手工分割结果；
+图\ref{RegistrationTransformation}是配准带来的变形，
+我们将变形施加到一个网格图像上来显示它的效果；
+图\ref{RegistrationWarpedAtlasLabel}是将配准带来的变形施加到图谱图像的结果，
+可以作为目标图像分割的一个估计。
 \begin{pics}[htpb]{图像相似度测度方法比较}{RegistrationExample}
+  \addsubpic{图谱图像}{width=0.3\textwidth}{RegistrationAtlasImage}
   \addsubpic{待配准图像}{width=0.3\textwidth}{RegistrationTarget}
-  \addsubpic{图谱}{width=0.3\textwidth}{RegistrationAtlas}
-  \addsubpic{配准并变形后的图谱}{width=0.3\textwidth}{RegistrationWarpedAtlas}
-  \addsubpic{标签传递结果}{width=0.3\textwidth}{RegistrationPrediction}
-  \addsubpic{手工分割结果}{width=0.3\textwidth}{RegistrationGroundTruth}
+  \addsubpic{变形的图谱图像}{width=0.3\textwidth}{RegistrationWarpedAtlasImage}
+  \addsubpic{图谱标签}{width=0.3\textwidth}{RegistrationAtlasLabel}
+  \addsubpic{配准产生的变形}{width=0.3\textwidth}{RegistrationTransformation}
+  \addsubpic{变形的图谱标签}{width=0.3\textwidth}{RegistrationWarpedAtlasLabel}
 \end{pics}
 
 \section{图谱选择}
@@ -213,6 +220,8 @@ ROI的设置与配准结果直接相关，选择的原则如下：
 刚性变换和仿射变换配准的只消耗不到1秒，
 而整个非刚性配准过程需要2分多钟。
 所以，我们提出了一个二次配准方法。
+整个方法分割流程如图\ref{MyMASFlowchart}。
+\pic[htpb]{分割流程图}{width=0.4\textwidth}{MyMASFlowchart}
 \begin{enumerate}
   \item 将所有的图谱和待分割图像使用仿射变换进行配准。
     由于仿射变换下的配准计算量小，
@@ -229,8 +238,6 @@ ROI的设置与配准结果直接相关，选择的原则如下：
   \item 将上一步筛选出的图谱中的标签融合，得到最终结果。
 \end{enumerate}
 
-整个方法分割流程如图\ref{MyMASFlowchart}。
-\pic[htpb]{分割流程图}{width=0.4\textwidth}{MyMASFlowchart}
 
 \section{标签融合}
 
@@ -253,7 +260,7 @@ ROI的设置与配准结果直接相关，选择的原则如下：
 我们任意选取4个切片，计算融合方法、融合数目和最终结果准且性的关系，
 如图\ref{LabelFusionNumAndMethod1}, \ref{LabelFusionNumAndMethod2},
 \ref{LabelFusionNumAndMethod3}, \ref{LabelFusionNumAndMethod4}所示
-（n只取到10，因为过多的图谱会导致计算时间快速上升）。
+（n只取到10，因为过多的图谱会导致计算时间快速上升，在实际应用中价值不大）。
 \begin{pics}[htpb]{结果准确性与融合方法和融合标签数目关系}{NMComparation}
   \addsubpic{d0-v0-s7}{width=0.45\textwidth}{LabelFusionNumAndMethod1}
   \addsubpic{d0-v0-s8}{width=0.45\textwidth}{LabelFusionNumAndMethod2}
