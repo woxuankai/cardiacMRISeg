@@ -1,11 +1,11 @@
 #!/bin/bash
 
-./run.sh -d0 -v0 -s8 -j4 -n5 -m1
-./run.sh -d0 -v9 -s7 -j4 -n5 -m1
-./run.sh -d1 -v0 -s5 -j4 -n5 -m1
-./run.sh -d1 -v9 -s4 -j4 -n5 -m1
-./run.sh -d2 -v0 -s6 -j4 -n5 -m1
-./run.sh -d2 -v9 -s7 -j4 -n5 -m1
+#./run.sh -d0 -v0 -s8 -j4 -n5 -m1
+#./run.sh -d0 -v9 -s7 -j4 -n5 -m1
+#./run.sh -d1 -v0 -s5 -j4 -n5 -m1
+#./run.sh -d1 -v9 -s4 -j4 -n5 -m1
+#./run.sh -d2 -v0 -s6 -j4 -n5 -m1
+#./run.sh -d2 -v9 -s7 -j4 -n5 -m1
 
 #exit 0
 

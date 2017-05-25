@@ -136,7 +136,7 @@ function dodice(){ # 1-> prediction 2->target  (file path)
 	return 0
 	}
 
-LNDOUBLE="$((LN*3))"
+LNDOUBLE="$((LN*2))"
 
 DOMAS='./multi_atlas_seg.sh \
 	-t "./data/${TARGET}.nii.gz" \
