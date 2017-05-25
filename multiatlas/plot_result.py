@@ -52,6 +52,7 @@ result_d1=np.array([
 
 fig,ax=plt.subplots()
 bplot=ax.boxplot(np.array([result_d0,result_d1]).T)
+plt.setp(bplot['medians'],color='black')
 ax.yaxis.grid(True)
 ax.set_xlabel('target')
 ax.set_ylabel('Dice')
@@ -59,7 +60,7 @@ ax.set_title('Multi Atlas Registration Result Summary')
 ax.set_xticklabels(['DET0002701','DET0009301'])
 
 fig,ax=plt.subplots()
-tplot=ax.plot(result_d0,'ro',result_d1,'b*')
+tplot=ax.plot(result_d0,'ro',result_d1,'b^')
 ax.yaxis.grid(True)
 ax.set_xlabel('volume')
 ax.set_ylabel('Dice')
