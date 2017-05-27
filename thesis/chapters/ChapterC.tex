@@ -106,8 +106,12 @@ ROI的设置与配准结果直接相关，选择的原则如下：
   \item ROI必须尽可能的小，需要配准的组织必须占整个ROI足够大的区域，
     否则配准效果可能不理想。
 \end{enumerate}
-    本文中，我们采取手工选择ROI的方法，将所有样本进行提取。
-    图\ref{RegistrationTarget}展示了 DET0002701 (d0) 手工选择的ROI。
+本文中，我们采取手工选择ROI的方法，将所有样本进行提取。
+图\ref{ROIAfter}展示了\ref{ROIBefore}手工选择的ROI。
+\begin{pics}[htpb]{选取ROI示例}{ROI}
+  \addsubpic{原始切面}{width=0.3\textwidth}{ROIBefore}
+  \addsubpic{手工选取的ROI}{width=0.3\textwidth}{ROIAfter}
+\end{pics}
 
 \subsection{灰度校正}
 由于磁共振采集到图像容易产生灰度不均以及某些部位灰度异常的情况，
@@ -182,24 +186,8 @@ ROI的设置与配准结果直接相关，选择的原则如下：
 
 
 \subsection{配准结果}
-使用上述方法，示例配准结果如下。
-图\ref{RegistrationAtlasImage}是图谱图像；
-图\ref{RegistrationTarget}是待配准的目标图像；
-图\ref{RegistrationWarpedAtlasImage}是变形后图谱图像，
-仔细比较，变形后的图谱图像已经和目标图像比较相似了；
-图\ref{RegistrationAtlasLabel}是图谱标签，即对图谱图像的手工分割结果；
-图\ref{RegistrationTransformation}是配准带来的变形，
-我们将变形施加到一个网格图像上来显示它的效果；
-图\ref{RegistrationWarpedAtlasLabel}是将配准带来的变形施加到图谱图像的结果，
-可以作为目标图像分割的一个估计。
-\begin{pics}[htpb]{图像相似度测度方法比较}{RegistrationExample}
-  \addsubpic{图谱图像}{width=0.3\textwidth}{RegistrationAtlasImage}
-  \addsubpic{待配准图像}{width=0.3\textwidth}{RegistrationTarget}
-  \addsubpic{变形的图谱图像}{width=0.3\textwidth}{RegistrationWarpedAtlasImage}
-  \addsubpic{图谱标签}{width=0.3\textwidth}{RegistrationAtlasLabel}
-  \addsubpic{配准产生的变形}{width=0.3\textwidth}{RegistrationTransformation}
-  \addsubpic{变形的图谱标签}{width=0.3\textwidth}{RegistrationWarpedAtlasLabel}
-\end{pics}
+使用上述方法，示例配准结果如图\ref{RegistrationResult}。
+\pic[htpb]{配准结果示例}{width=\textwidth}{RegistrationResult}
 
 
 \subsection{标签传播}
