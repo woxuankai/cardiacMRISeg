@@ -126,23 +126,6 @@ ROI的设置与配准结果直接相关，选择的原则如下：
 \end{pics}
 
 \subsection{配准策略}
-\subsubsection{多步骤配准}
-由于心脏运动是非刚性的，所以毫无疑问的，我们在配准中需要使用非刚性变换。
-然而，如果在非刚性配准之前，图像有较大的位置差异，
-不仅仅配准时间较长，配准结果也很不好。
-所以，我们在进行非刚性变换配准之前，先进行粗配准，
-尽量减少图像之间的差异。
-
-因此，我们采用一下配准策略：
-刚性变换配准---仿射变换配准---非刚性配准，多步骤地进行配准。
-
-另外，本实验中，非刚性配准使用的BSpline形变模型，
-优化器使用计算量较少的随机梯度下降法。
-
-以及，处于对磁共振图像灰度不一致性的考虑，
-我们在所有的配准步骤中都使用互信息量作为相似度量化测度。
-
-
 \subsubsection{多分辨率配准}
 在图像配准时，采用多分辨率配准方法有利于改进配准的速度、精确度和自动化程度。
 在图像像素较少的地方采用粗糙的比例，产生一个映射，
@@ -165,6 +148,39 @@ ROI的设置与配准结果直接相关，选择的原则如下：
 在对原图下采样完成后，我们还对采样后的图像进行模糊处理，
 在每一层次图像，高斯模糊中参数$\sigma$分别为3，2，1和0。
 
+
+\subsubsection{多步骤配准}
+由于心脏运动是非刚性的，所以毫无疑问的，我们在配准中需要使用非刚性变换。
+然而，如果在非刚性配准之前，图像有较大的位置差异，
+不仅仅配准时间较长，配准结果也很不好。
+所以，我们在进行非刚性变换配准之前，先进行粗配准，
+尽量减少图像之间的差异。
+
+因此，我们采用以下配准策略：
+刚性变换配准---仿射变换配准---非刚性配准，多步骤地进行配准。
+
+另外，本实验中，非刚性配准使用的BSpline形变模型，
+优化器使用计算量较少的随机梯度下降法。
+
+以及，处于对磁共振图像灰度不一致性的考虑，
+我们在所有的配准步骤中都使用互信息量作为相似度量化测度。
+
+图\ref{RegistrationAffineOnly}展示了将只使用仿射变换配准后得到的变换
+应用于图谱图像的结果。
+图\ref{RegistrationWarpedAtlasImage}展示了将使用非刚性形变模型配准得到的变换
+应用与图谱图像的结果。
+\begin{pics}[htpb]{多步骤配准}{RegistrationMultiProcess}
+  \addsubpic{图谱图像}{width=0.3\textwidth}{RegistrationAtlasImage}
+  \addsubpic{只使用仿射变换}{width=0.3\textwidth}{RegistrationAffineOnly}\\
+  \addsubpic{使用非刚性形变模型}{width=0.3\textwidth}%
+    {RegistrationWarpedAtlasImage}
+  \addsubpic{目标图像}{width=0.3\textwidth}{RegistrationTarget}
+\end{pics}
+
+
+
+
+
 \subsection{配准结果}
 使用上述方法，示例配准结果如下。
 图\ref{RegistrationAtlasImage}是图谱图像；
@@ -184,6 +200,10 @@ ROI的设置与配准结果直接相关，选择的原则如下：
   \addsubpic{配准产生的变形}{width=0.3\textwidth}{RegistrationTransformation}
   \addsubpic{变形的图谱标签}{width=0.3\textwidth}{RegistrationWarpedAtlasLabel}
 \end{pics}
+
+
+\subsection{标签传播}
+
 
 \section{图谱选择}
 如上一章中所述，在图谱配准完成后，
