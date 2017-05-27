@@ -79,36 +79,41 @@ MICCAI2013数据集共有155个电影式磁共振图像。
 由于我们没有测试数据集的金标准，所以只能从训练数据集中挑选。
 本文中，我们选取DET0002701，DET0009301，DET0016101，DET0001101，DET0001401，
 DET0001701，DET0002501号数据作为实验数据(d0-d6)，
-其中，我们将 DET0002701 (d0) 和 DET0009301 (d1) 分别作为待配准数据。
-值得注意的是，每一个数据都是四维的。
+在实验中，我们分别将 DET0002701 (d0) 和 DET0009301 (d1) 作为待配准数据，
+使用其它数据对其进行分割；
+分割完成后，将数据提供的分割结果作为标准分割（金标准），
+将多图谱方法得到的分割结果与标准分割进行比较。
+
+值得注意的是，每一个数据都是四维的。例如，
 DET0002701号数据(d0)共20帧，每帧数据$x,y,z$为$256,256,12$，
-$z$为心脏长轴方向切片。
+$z$为心脏长轴方向。
 
 图\ref{OneVolume}展示了DET0002701号数据的第1帧图像，
 每一个分图都是长轴方向一个切片。
 从图中我们可以看到，在一帧图像中，心脏底部和心尖部分特征较少，
 而且长轴方向的分辨率较低，三维图像配准效果不好。
 因此，我们只选取心脏长轴方向中间的切片进行二维配准。
-\pic[htpb]{DET0002701号数据第1帧图像（从左到右、从上到下为心尖到心脏基部）}%
+\pic[htbp]{DET0002701号数据第1帧图像（从左到右、从上到下为心尖到心脏基部）}%
 {width=\textwidth}{OneVolume}
 
 图\ref{The7thSlice}展示了DET0002701号图像的第9层数据在一个心动周期内的变化，
 注意比较左心室壁的厚度变化和右心室的形变。
-\pic[htpb]{DET0002701号数据第9层图像（从上到下、从左到右为一个心动周期）}%
+\pic[htbp]{DET0002701号数据第9层图像（从上到下、从左到右为一个心动周期）}%
 {width=\textwidth}{The7thSlice}
 
 \section{图像配准}
 \subsection{ROI选择}
-在图像配准之前，我们首先需要设置我们感兴趣的区域(Region of Interest, ROI)，
+在图像配准之前，我们首先需要设置我们感兴趣的区域(Region of Interest, ROI)。
+设置ROI的目的，是为了是尽量使需要配准的组织占整个ROI足够大的区域；
+若待配准组织在ROI占比过小，配准效果可能不理想。
 ROI的设置与配准结果直接相关，选择的原则如下：
 \begin{enumerate}
   \item ROI必须包含心脏的所有组织。
-  \item ROI必须尽可能的小，需要配准的组织必须占整个ROI足够大的区域，
-    否则配准效果可能不理想。
+  \item 在包含所有心脏组织的前提下，ROI必须尽可能的小。
 \end{enumerate}
 本文中，我们采取手工选择ROI的方法，将所有样本进行提取。
 图\ref{ROIAfter}展示了\ref{ROIBefore}手工选择的ROI。
-\begin{pics}[htpb]{选取ROI示例}{ROI}
+\begin{pics}[htbp]{选取ROI示例}{ROI}
   \addsubpic{原始切面}{width=0.3\textwidth}{ROIBefore}
   \addsubpic{手工选取的ROI}{width=0.3\textwidth}{ROIAfter}
 \end{pics}
@@ -124,9 +129,9 @@ ROI的设置与配准结果直接相关，选择的原则如下：
 
 图\ref{WinBefore}\ref{WinAfter}分别展示了灰度校正之前和之后的结果，
 图\ref{WinBefore}中，图像胸腔前侧高亮部分导致整个图像看起来较暗。
-\begin{pics}[htpb]{图像相似度测度方法比较}{WinComparation}
-  \addsubpic{原图}{width=0.45\textwidth}{WinBefore}
-  \addsubpic{校正后的结果}{width=0.45\textwidth}{WinAfter}
+\begin{pics}[htbp]{图像相似度测度方法比较}{WinComparation}
+  \addsubpic{原图}{width=0.3\textwidth}{WinBefore}
+  \addsubpic{校正后的结果}{width=0.3\textwidth}{WinAfter}
 \end{pics}
 
 \subsection{配准策略}
@@ -144,7 +149,7 @@ ROI的设置与配准结果直接相关，选择的原则如下：
 采用递归方式对其进行操作，开始采用粗糙的配准，
 以后逐步采用较细的配准，重复操作直到达到最好水平位置。
 如图\ref{MultiResolution}所示。
-\pic[htpb]{多分辨率配准策略\citeup{ITKBookDevelop}}%
+\pic[htbp]{多分辨率配准策略\citeup{ITKBookDevelop}}%
 {width=0.8\textwidth}{MultiResolution}
 
 在本实验中，我们选择四层分辨率配准，
@@ -163,34 +168,47 @@ ROI的设置与配准结果直接相关，选择的原则如下：
 因此，我们采用以下配准策略：
 刚性变换配准---仿射变换配准---非刚性配准，多步骤地进行配准。
 
+图\ref{RegistrationAffineOnly}展示了将只使用仿射变换配准后得到的变换
+应用于图谱图像的结果。
+图\ref{RegistrationWarpedAtlasImage}展示了将使用非刚性形变模型配准得到的变换
+应用与图谱图像的结果。
+\begin{pics}[htbp]{多步骤配准示例}{RegistrationMultiProcess}
+  \addsubpic{图谱图像}{width=0.23\textwidth}{RegistrationAtlasImage}
+  \addsubpic{只使用仿射变换}{width=0.23\textwidth}{RegistrationAffineOnly}
+  \addsubpic{使用非刚性形变模型}{width=0.23\textwidth}%
+    {RegistrationWarpedAtlasImage}
+  \addsubpic{目标图像}{width=0.23\textwidth}{RegistrationTarget}
+\end{pics}
+
+
+
+\subsection{配准结果}
+使用上述方法，示例配准结果如图\ref{RegistrationResult}。
+\pic[htbp]{配准结果示例}{width=\textwidth}{RegistrationResult}
+图中，我们将图谱图像与目标图像配准后，将得到的变换作用于图谱图像，
+可以看到，变换后的图谱图像与目标图像已经比较相似了。
+另外，我们还将得到的变换作用于一个网格图像，
+得到的结果用来展示配准得到的图像变换。
+
 另外，本实验中，非刚性配准使用的BSpline形变模型，
 优化器使用计算量较少的随机梯度下降法。
 
 以及，处于对磁共振图像灰度不一致性的考虑，
 我们在所有的配准步骤中都使用互信息量作为相似度量化测度。
 
-图\ref{RegistrationAffineOnly}展示了将只使用仿射变换配准后得到的变换
-应用于图谱图像的结果。
-图\ref{RegistrationWarpedAtlasImage}展示了将使用非刚性形变模型配准得到的变换
-应用与图谱图像的结果。
-\begin{pics}[htpb]{多步骤配准}{RegistrationMultiProcess}
-  \addsubpic{图谱图像}{width=0.3\textwidth}{RegistrationAtlasImage}
-  \addsubpic{只使用仿射变换}{width=0.3\textwidth}{RegistrationAffineOnly}\\
-  \addsubpic{使用非刚性形变模型}{width=0.3\textwidth}%
-    {RegistrationWarpedAtlasImage}
-  \addsubpic{目标图像}{width=0.3\textwidth}{RegistrationTarget}
-\end{pics}
 
 
+\section{标签传播}
+完成配准之后，我们将配准得到的图像变换应用到图谱标签上，
+得到的便是对目标图像分割的一个估计。
+在本实验中，不同标签是用不同像素值来区分的，
+高阶次的插值可能产生不同的像素值，故我们只能使用最邻近插值。
+具体如图\ref{LabelPropagation}所示。
+图中，我们将配准得到的变换同时施加于图谱图像和标签，
+并将变形后的图谱图像和标签与目标图像和标准分割尽心比较。
+通过比较，我们的可以认为，我们的图谱分割方法是行之有效的。
+\pic[htbp]{标签传播示例}{width=\textwidth}{LabelPropagation}
 
-
-
-\subsection{配准结果}
-使用上述方法，示例配准结果如图\ref{RegistrationResult}。
-\pic[htpb]{配准结果示例}{width=\textwidth}{RegistrationResult}
-
-
-\subsection{标签传播}
 
 
 \section{图谱选择}
@@ -201,7 +219,7 @@ ROI的设置与配准结果直接相关，选择的原则如下：
 图\ref{MetricMI}，\ref{MetricCC}和\ref{MetricMS}展示了各种方法的效果。
 图中，纵坐标是变形后图谱的标记与目标图像的分割金标准的 Dice 值，
 横坐标是变形后图谱的图像与目标图像分别做互信息、互相关和灰度均方差。
-\begin{pics}[htpb]{图像相似度测度方法比较}{MetricComparation}
+\begin{pics}[htbp]{图像相似度测度方法比较}{MetricComparation}
   \addsubpic{互信息量}{width=0.45\textwidth}{MetricMI}
   \addsubpic{互相关}{width=0.45\textwidth}{MetricCC}
   \addsubpic{灰度均方差}{width=0.45\textwidth}{MetricMS}
@@ -229,7 +247,7 @@ ROI的设置与配准结果直接相关，选择的原则如下：
 而整个非刚性配准过程需要2分多钟。
 所以，我们提出了一个二次配准方法。
 整个方法分割流程如图\ref{MyMASFlowchart}。
-\pic[htpb]{分割流程图}{width=0.4\textwidth}{MyMASFlowchart}
+\pic[htbp]{分割流程图}{width=0.4\textwidth}{MyMASFlowchart}
 \begin{enumerate}
   \item 将所有的图谱和待分割图像使用仿射变换进行配准。
     由于仿射变换下的配准计算量小，
@@ -269,7 +287,7 @@ ROI的设置与配准结果直接相关，选择的原则如下：
 如图\ref{LabelFusionNumAndMethod1}, \ref{LabelFusionNumAndMethod2},
 \ref{LabelFusionNumAndMethod3}, \ref{LabelFusionNumAndMethod4}所示
 （n只取到10，因为过多的图谱会导致计算时间快速上升，在实际应用中价值不大）。
-\begin{pics}[htpb]{结果准确性与融合方法和融合标签数目关系}{NMComparation}
+\begin{pics}[htbp]{结果准确性与融合方法和融合标签数目关系}{NMComparation}
   \addsubpic{d0-v0-s7}{width=0.45\textwidth}{LabelFusionNumAndMethod1}
   \addsubpic{d0-v0-s8}{width=0.45\textwidth}{LabelFusionNumAndMethod2}
   \addsubpic{d1-v2-s4}{width=0.45\textwidth}{LabelFusionNumAndMethod3}
@@ -283,6 +301,8 @@ ROI的设置与配准结果直接相关，选择的原则如下：
 我们挑选$3n=18$个图谱进行非刚性配准。
 在标签融合算法上，从图上我们可以看到，STAPLE方法并没有比多数投票法的效果好太多，
 但是运算量却增加了很多，所以我们选择多数投票法。
+\pic[htbp]{标签融合示例}{width=\textwidth}{LabelFusion}
+
 
 \section{分割结果}
 我们将 DET0002701 所有 $z=7$ 的数据（心脏长轴方向切片）和 
@@ -291,7 +311,7 @@ DET0009301 中所有 $z=4$ 的数据按照上述方法进行多图谱配准，
 
 图\ref{MASResult}展示了每一个分割结果，
 图\ref{MASResultSummary}展示了分割结果统计数据。
-\begin{pics}[htpb]{分割结果展示}{NMComparation}
+\begin{pics}[htbp]{分割结果展示}{NMComparation}
   \addsubpic{单个结果}{width=0.45\textwidth}{MASResult}
   \addsubpic{结果统计}{width=0.45\textwidth}{MASResultSummary}
 \end{pics}
