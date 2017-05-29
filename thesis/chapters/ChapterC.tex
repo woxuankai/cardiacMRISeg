@@ -6,6 +6,11 @@
 
 \section{平台与工具}
 在算法的实现中，我们基于Linux(Debian sid)操作系统和Bash与Python语言，
+使用大脑功能磁共振成像软件库
+\citeup{JenkinsonFSL2012,WoolrichBayesian2009,SmithAdvances2004}
+(FMRIB Software Library, FSL)
+(Functional MRI of the Brain, FMRIB)
+对图像进行预处理，
 使用ANTs\citeup{ANTsRegistration,ANTsBspline}、
 SimpleITK\citeup{LowekampDesignOfSimpleITK2013}和
 ITK\citeup{ITKBookDevelop,ITKBookDesign,InsightToolKit}工具
@@ -16,9 +21,12 @@ ITK\citeup{ITKBookDevelop,ITKBookDesign,InsightToolKit}工具
 
 在本文所有图的绘制中使用了
 SciPy\citeup{SciPy,ScientificComputingPython1,ScientificComputingPython2}
-套件里的Matplotlib\citeup{Matplotlib}和NumPy\citeup{NumPy}工具，
-使用了ITK-SNAP\citeup{ITKSnap}软件显示磁共振图片以及分割结果，
-同时， Inkscape (\href{http://inkscape.org}{inkscape.org}) 和 GIMP (GNU Image Manipulation Program, \href{http://gimp.org}{gimp.org}) 软件在绘图过程中也起了很大作用。
+套件里的Matplotlib\citeup{Matplotlib}和NumPy\citeup{NumPy}，
+使用了ITK-SNAP\citeup{ITKSnap}软件显示磁共振图片以及分割结果。
+同时，
+Inkscape (\href{http://inkscape.org}{inkscape.org})
+和 GIMP (GNU Image Manipulation Program, \href{http://gimp.org}{gimp.org})
+软件在绘图过程中也起了很大作用。
 
 %ants、ITK简介？凑字数
 \subsection{ITK}
@@ -111,8 +119,9 @@ ROI的设置与配准结果直接相关，选择的原则如下：
   \item ROI必须包含心脏的所有组织。
   \item 在包含所有心脏组织的前提下，ROI必须尽可能的小。
 \end{enumerate}
+
 本文中，我们采取手工选择ROI的方法，将所有样本进行提取。
-图\ref{ROIAfter}展示了\ref{ROIBefore}手工选择的ROI。
+图\ref{ROIAfter}展示了对\ref{ROIBefore}手工选择ROI的结果。
 \begin{pics}[htbp]{选取ROI示例}{ROI}
   \addsubpic{原始切面}{width=0.3\textwidth}{ROIBefore}
   \addsubpic{手工选取的ROI}{width=0.3\textwidth}{ROIAfter}
@@ -183,6 +192,14 @@ ROI的设置与配准结果直接相关，选择的原则如下：
 
 
 \subsection{配准结果}
+图\ref{RegistrationFramework}所示配准框架，
+在本文中实践如图\ref{RegistrationFrameworkPar}所示。
+\pic[htbp]{本文中所使用配准方法}{width=\textwidth}{RegistrationFrameworkPar}
+本实验中，非刚性配准使用的BSpline形变模型，
+优化器使用计算量较少的随机梯度下降法。
+以及，处于对磁共振图像灰度不一致性的考虑，
+我们在所有的配准步骤中都使用互信息量作为相似度量化测度。
+
 使用上述方法，示例配准结果如图\ref{RegistrationResult}。
 \pic[htbp]{配准结果示例}{width=\textwidth}{RegistrationResult}
 
@@ -194,13 +211,6 @@ ROI的设置与配准结果直接相关，选择的原则如下：
 另外，我们还将得到的变换作用于一个网格图像，
 得到的结果用来展示配准得到的图像变换。
 
-图\ref{RegistrationFramework}所示配准框架，
-在本文中实践如图\ref{RegistrationFrameworkPar}所示。
-\pic[htbp]{本文中所使用配准方法}{width=\textwidth}{RegistrationFrameworkPar}
-本实验中，非刚性配准使用的BSpline形变模型，
-优化器使用计算量较少的随机梯度下降法。
-以及，处于对磁共振图像灰度不一致性的考虑，
-我们在所有的配准步骤中都使用互信息量作为相似度量化测度。
 
 
 
