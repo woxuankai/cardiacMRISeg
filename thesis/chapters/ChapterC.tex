@@ -185,14 +185,20 @@ ROI的设置与配准结果直接相关，选择的原则如下：
 \subsection{配准结果}
 使用上述方法，示例配准结果如图\ref{RegistrationResult}。
 \pic[htbp]{配准结果示例}{width=\textwidth}{RegistrationResult}
+
 图中，我们将图谱图像与目标图像配准后，将得到的变换作用于图谱图像，
-可以看到，变换后的图谱图像与目标图像已经比较相似了。
+以展示配准效果。
+可以看到，变换后的图谱图像与目标图像已经比较相似了，
+我们可以认为配准是比较成功的。
+
 另外，我们还将得到的变换作用于一个网格图像，
 得到的结果用来展示配准得到的图像变换。
 
-另外，本实验中，非刚性配准使用的BSpline形变模型，
+图\ref{RegistrationFramework}所示配准框架，
+在本文中实践如图\ref{RegistrationFrameworkPar}所示。
+\pic[htbp]{本文中所使用配准方法}{width=\textwidth}{RegistrationFrameworkPar}
+本实验中，非刚性配准使用的BSpline形变模型，
 优化器使用计算量较少的随机梯度下降法。
-
 以及，处于对磁共振图像灰度不一致性的考虑，
 我们在所有的配准步骤中都使用互信息量作为相似度量化测度。
 
