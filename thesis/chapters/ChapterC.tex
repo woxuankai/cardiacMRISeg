@@ -76,7 +76,7 @@ ANTs还提供了一些独占的组件，例如多变量相似性测度方法，
 
 我们使用MICCAI 2013 SATA Workshop on  Cardiac Left Ventricle Segmentation
 提供的数据对我们的算法进行检验。
-MICCAI2013数据集共有155个电影式磁共振图像。
+MICCAI 2013数据集共有155个电影式磁共振图像。
 其中用于训练的数据83个，用于测试的数据72个。
 每个数据最多包含30帧最少包含15帧三维图像。
 每个体数据由12到30个切片组成。
@@ -193,14 +193,17 @@ ROI的设置与配准结果直接相关，选择的原则如下：
 
 \subsection{配准结果}
 图\ref{RegistrationFramework}所示配准框架，
-在本文中实践如图\ref{RegistrationFrameworkPar}所示。
+在本文中的实现如图\ref{RegistrationFrameworkPar}所示。
+
 \pic[htbp]{本文中所使用配准方法}{width=\textwidth}{RegistrationFrameworkPar}
+
 本实验中，非刚性配准使用的BSpline形变模型，
 优化器使用计算量较少的随机梯度下降法。
 以及，处于对磁共振图像灰度不一致性的考虑，
 我们在所有的配准步骤中都使用互信息量作为相似度量化测度。
 
 使用上述方法，示例配准结果如图\ref{RegistrationResult}。
+
 \pic[htbp]{配准结果示例}{width=\textwidth}{RegistrationResult}
 
 图中，我们将图谱图像与目标图像配准后，将得到的变换作用于图谱图像，

@@ -1,4 +1,4 @@
-#	segmentation of dynamic cardiac MRI images using multi-altas method
+#	segmentation of dynamic cardiac MR images using multi-altas method
 
 ##	project layout
 
