@@ -8,14 +8,13 @@
 在算法的实现中，我们基于Linux(Debian sid)操作系统和Bash与Python语言，
 使用大脑功能磁共振成像软件库
 \citeup{JenkinsonFSL2012,WoolrichBayesian2009,SmithAdvances2004}
-(FMRIB Software Library, FSL)
-(Functional MRI of the Brain, FMRIB)
+(FMRIB(Functional MRI of the Brain) Software Library, FSL)
 对图像进行预处理，
 使用ANTs\citeup{ANTsRegistration,ANTsBspline}、
 SimpleITK\citeup{LowekampDesignOfSimpleITK2013}和
 ITK\citeup{ITKBookDevelop,ITKBookDesign,InsightToolKit}工具
 进行配准、图谱选择、标签融合、度量分割结果准确性等操作，
-并使用了GNU Parallel\citeup{GNUParallel}工并行加速。
+并使用了GNU Parallel\citeup{GNUParallel}工具完成并行运算。
 所有实验在一台配置为Intel i5-4200M CPU, 4G$\times$2 1600MHz RAM, 
 配有SSD的PC上完成。
 
@@ -102,7 +101,7 @@ $z$为心脏长轴方向。
 \pic[htbp]{DET0002701号数据第1帧图像（从左到右、从上到下为心尖到心脏基部）}%
 {width=\textwidth}{OneVolume}
 
-从图中我们可以看到，在一帧图像中，心脏尖部分特征较少，
+从图中我们可以看到，在一帧图像中，心脏尖部分特征较少且所占比例小，
 而心脏基部结构复杂，包含了肺动脉、主动脉等等结构，
 在实践中，我们也发现心脏底部和心尖难以配准。
 另外，长轴方向的分辨率较低（10像素左右），所以三维图像配准效果不好。
@@ -113,7 +112,9 @@ $z$为心脏长轴方向。
 {width=\textwidth}{The7thSlice}
 
 观察可以发现，一个心动周期之内，左心室壁的厚度变化和右心室的形变非常明显，
-而且心脏内膜附近还有乳头肌等一系列组织。
+因此，很明显的，我们需要使用非刚性形变进行配准。
+心脏内膜附近有乳头肌等组织，而且与心肌的灰度类似，
+可以预见，配准将遇到不少困难。
 
 
 \section{图像配准}
@@ -354,5 +355,5 @@ DET0009301 中所有 $z=4$ 的数据按照上述方法进行多图谱配准，
 
 \section{本章小结}
 本章首先介绍了所用到的工具，然后结合上一章多图谱分割方法的理论基础，
-针对电影式磁共振图像与心脏特点，在多图谱方法的框架之下，选择调整参数。
+针对电影式磁共振图像与心脏特点，在多图谱方法的框架之下，选择调整参数，
 设计预处理、配准、图谱选择、融合等方法，完成了多图谱方法对左心室的分割。
