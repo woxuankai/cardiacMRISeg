@@ -52,13 +52,14 @@
 \renewcommand{\ttfamily}{\CTEX@save@ttfamily \CJKfamily {rm}}
 \RequirePackage{etoolbox}[2011/01/03]
 \RequirePackage{ifthen}
+
 \newcommand{\bachelor@uestcthesis}{
 \newcommand{\degree@uestcthesis}{bachelor}
 \newcommand{\multibibflag@uestcthesis}{}
 
 \newcommand{\thesisname@degree}{电子科技大学学士学位论文}
 
-\newcommand{\chapternumberformat@uestcthesis}{\arabic{chapter}}
+\newcommand{\chapternumberformat@uestcthesis}{\chinese{chapter}}
 \newcommand{\publicationsname@degree}{}%为bachelor选项下使用english选项而设。
 \newcommand{\thesisname@english}{}%为bachelor选项下使用english选项而设。
 }
